@@ -20,10 +20,9 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
-    <ProjectGuid>{94294F9E-DCD4-4952-8FCF-5B0BD03CD9DD}</ProjectGuid>
-    <RootNamespace>IDEProj</RootNamespace>
+    <ProjectGuid>{47E0E6F0-37D6-4496-B888-4B2AD750983C}</ProjectGuid>
+    <RootNamespace>IDEProjServer</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-    <ProjectName>IDEProj-Client</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
