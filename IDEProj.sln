@@ -7,6 +7,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "IDEProj-Client", "IDEProj\I
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "IDEProj-Server", "IDEProj-Server\IDEProj-Server.vcxproj", "{47E0E6F0-37D6-4496-B888-4B2AD750983C}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Includes", "Includes", "{EF946A5E-F7FA-4963-B6D5-82C0709B5A8B}"
+	ProjectSection(SolutionItems) = preProject
+		include\chat_message.hpp = include\chat_message.hpp
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
