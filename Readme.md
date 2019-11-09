@@ -21,4 +21,4 @@ Header files are commented in Doxygen style. You can generate a documentation us
 3) Для каждого из проектов в решении добавить пакет boost (v1.71.0) через Управление пакетами NuGet
 4) Для каждого из проектов в решении добавить пакет boost-vc142 (v1.71.0) через Управление пакетами NuGet
 5) Установить расширение "1-Click Docs" через контекстное меню Расширения
-6) Назначить пути до Doxygen в Параметрах (предварительно установить Doxygen с официального сайта http://www.doxygen.nl/download.html)
+6) [для генерации документации] Назначить пути до Doxygen в Параметрах (предварительно установить Doxygen с официального сайта http://www.doxygen.nl/download.html)
