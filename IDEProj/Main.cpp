@@ -15,11 +15,11 @@
 #include <boost/asio.hpp>
 #include <boost/thread/thread.hpp>
 
-#include "chat_message.hpp"
+#include "message.hpp"
 
 using boost::asio::ip::tcp;
 
-typedef std::deque<chat_message> chat_message_queue;
+typedef std::deque<message> message_queue;
 
 class chat_client
 {
@@ -34,7 +34,7 @@ public:
 				boost::asio::placeholders::error));
 	}
 
-	void write(const chat_message& msg)
+	void write(const message& msg)
 	{
 		io_service_.post(boost::bind(&chat_client::do_write, this, msg));
 	}
@@ -51,7 +51,7 @@ private:
 		if (!error)
 		{
 			boost::asio::async_read(socket_,
-				boost::asio::buffer(read_msg_.data(), chat_message::header_length),
+				boost::asio::buffer(read_msg_.data(), message::header_length),
 				boost::bind(&chat_client::handle_read_header, this,
 					boost::asio::placeholders::error));
 		}
@@ -79,7 +79,7 @@ private:
 			std::cout.write(read_msg_.body(), read_msg_.body_length());
 			std::cout << "\n";
 			boost::asio::async_read(socket_,
-				boost::asio::buffer(read_msg_.data(), chat_message::header_length),
+				boost::asio::buffer(read_msg_.data(), message::header_length),
 				boost::bind(&chat_client::handle_read_header, this,
 					boost::asio::placeholders::error));
 		}
@@ -89,7 +89,7 @@ private:
 		}
 	}
 
-	void do_write(chat_message msg)
+	void do_write(message msg)
 	{
 		bool write_in_progress = !write_msgs_.empty();
 		write_msgs_.push_back(msg);
@@ -131,8 +131,8 @@ private:
 private:
 	boost::asio::io_service& io_service_;
 	tcp::socket socket_;
-	chat_message read_msg_;
-	chat_message_queue write_msgs_;
+	message read_msg_;
+	message_queue write_msgs_;
 };
 
 int main(int argc, char* argv[])
@@ -155,11 +155,11 @@ int main(int argc, char* argv[])
 
 		boost::thread t(boost::bind(&boost::asio::io_service::run, &io_service));
 
-		char line[chat_message::max_body_length + 1];
-		while (std::cin.getline(line, chat_message::max_body_length + 1))
+		char line[message::max_body_length + 1];
+		while (std::cin.getline(line, message::max_body_length + 1))
 		{
 			using namespace std; // For strlen and memcpy.
-			chat_message msg;
+			message msg;
 			msg.body_length(strlen(line));
 			memcpy(msg.body(), line, msg.body_length());
 			msg.encode_header();

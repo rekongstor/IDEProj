@@ -9,7 +9,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "IDEProj-Server", "IDEProj-S
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Includes", "Includes", "{EF946A5E-F7FA-4963-B6D5-82C0709B5A8B}"
 	ProjectSection(SolutionItems) = preProject
-		include\chat_message.hpp = include\chat_message.hpp
+		include\message.hpp = include\message.hpp
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Boost Tests", "Boost Tests\Boost Tests.vcxproj", "{F5CDA8F1-7B52-41FD-B839-542C0AF7DE84}"
