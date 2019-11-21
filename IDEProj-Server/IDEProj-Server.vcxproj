@@ -133,7 +133,18 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="game.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="room.cpp" />
+    <ClCompile Include="server.cpp" />
+    <ClCompile Include="session.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="game.h" />
+    <ClInclude Include="participant.h" />
+    <ClInclude Include="room.h" />
+    <ClInclude Include="server.h" />
+    <ClInclude Include="session.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
