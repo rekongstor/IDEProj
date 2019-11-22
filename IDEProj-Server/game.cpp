@@ -18,7 +18,7 @@ bool game::place(int, int)
 
 void game::set_state(egs gs)
 {
-	
+
 }
 
 bool game::turn(int, int)

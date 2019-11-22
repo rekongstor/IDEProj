@@ -2,17 +2,17 @@
 
 #include "participant.h"
 
-enum class egs
-{
-	preparation,
-	turn_1,
-	turn_2,
-	end
-};
 
 class game
 {
 public:
+	enum egs
+	{
+		preparation,
+		turn_1,
+		turn_2,
+		end
+	};
 	game(participant&, participant&);
 	bool place(int, int);
 	void set_state(egs);
