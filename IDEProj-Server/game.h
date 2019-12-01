@@ -1,7 +1,7 @@
 #pragma once
 
 #include "participant.h"
-
+#include "field.hpp"
 
 class game
 {
@@ -21,7 +21,7 @@ public:
 private:
 	participant& m_participant_1;
 	participant& m_participant_2;
-	int m_field_1[10][10];
-	int m_field_2[10][10];
+	field m_field_1;
+	field m_field_2;
 	egs game_state;
 };
