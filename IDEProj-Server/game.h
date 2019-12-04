@@ -23,5 +23,7 @@ public:
 	field m_field_1;
 	field m_field_2;
 	egs game_state;
+	bool m_p1_ready;
+	bool m_p2_ready;
 private:
 };
