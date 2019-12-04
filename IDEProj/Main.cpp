@@ -51,6 +51,27 @@ int main(int argc, char* argv[])
 			msg.body_length(strlen(line));
 			memcpy(msg.body(), line, msg.body_length());
 			msg.encode_header();
+
+			if (c.get_status() == 'd') {
+				if ((strlen(line) == 9 && line[0] == 's' && line[2] >= 48 &&
+					line[2] <= 57 && line[4] >= 48 && line[4] <= 57 &&
+					line[6] >= 49 && line[6] <= 52)  && (line[8] == 'v' || line[8] == 'h')) {
+				}
+				else {
+					cout << "Invalid command!";
+					continue;
+				}
+			} else {
+				if (c.get_status() == 'r') {
+					if (strlen(line) == 3 && line[0] >= 48 && line[0] <= 57 &&
+						line[2] >= 48 && line[2] <= 57) {
+					}
+					else {
+						cout << "Invalid command!";
+						continue;
+					}
+				}
+			}
 			c.write(msg);
 		}
 

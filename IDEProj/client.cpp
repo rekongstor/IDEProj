@@ -54,6 +54,22 @@ void client::close()
 		{
 			std::cout.write(m_read_msg.body(), m_read_msg.body_length());
 			std::cout << "\n";
+			memcpy(status, m_read_msg.body(), m_read_msg.body_length());
+			if (status[0] == 'r') {
+				std::cout << "Placement completed successfully.";
+			}
+			if (status[0] == 'h') {
+				std::cout << "Successful hit!";
+			}
+			if (status[0] == 'm') {
+				std::cout << "Oops! Missed.";
+			}
+			if (status[0] == 'f') {
+				std::cout << "This is not your turn! Wait...";
+			}
+			if (status[0] == 'g') {
+				std::cout << "The game is over.";
+			}
 			boost::asio::async_read(m_socket,
 				boost::asio::buffer(m_read_msg.data(), message::header_length),
 				boost::bind(&client::handle_read_header, this,
@@ -97,6 +113,11 @@ void client::close()
 		{
 			do_close();
 		}
+	}
+
+	char client::get_status() 
+	{
+		return status[0];
 	}
 
 	void client::do_close()
