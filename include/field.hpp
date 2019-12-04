@@ -47,9 +47,7 @@ public:
 				m_field[x + i * (direction == 'h') + 1][y + i * (direction == 'v')] == 1 ||
 				m_field[x + i * (direction == 'h') - 1][y + i * (direction == 'v')] == 1 ||
 				m_field[x + i * (direction == 'h')][y + i * (direction == 'v') + 1] == 1 ||
-				m_field[x + i * (direction == 'h')][y + i * (direction == 'v') - 1] == 1 ||
-				x + i * (direction == 'h') > 9 || x + i * (direction == 'h') + 1 > 9 || x + i * (direction == 'h') - 1 < 0 ||
-				y + i * (direction == 'v') > 9 || y + i * (direction == 'v') + 1 > 9 || y + i * (direction == 'v') - 1 < 0) {
+				m_field[x + i * (direction == 'h')][y + i * (direction == 'v') - 1] == 1) {
 				return false;
 			}
 		}
