@@ -14,6 +14,11 @@ void game::set_state(egs gs)
 
 }
 
+game::egs game::get_state()
+{
+	return game_state;
+}
+
 bool game::turn(int x, int y)
 {
 	field k;
