@@ -29,5 +29,8 @@
     <ClInclude Include="client.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
+    <ClInclude Include="client_gui_console.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
