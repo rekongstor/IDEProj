@@ -39,6 +39,7 @@ public:
 		{
 			set_cell(x + i * (direction == 'h'), y + i * (direction == 'v'), cell::ship);
 		}
+		return true;
 	}
 
 private:
