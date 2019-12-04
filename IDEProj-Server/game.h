@@ -1,6 +1,5 @@
 #pragma once
 
-#include "participant.h"
 #include "field.hpp"
 
 class game
@@ -16,12 +15,13 @@ public:
 	game();
 	bool place(int, int);
 	void set_state(egs);
+	egs get_state();
 	bool turn(int, int);
 
-private:
-	participant* m_participant_1;
-	participant* m_participant_2;
+	void* m_participant_1;
+	void* m_participant_2;
 	field m_field_1;
 	field m_field_2;
 	egs game_state;
+private:
 };
