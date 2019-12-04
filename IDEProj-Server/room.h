@@ -12,6 +12,6 @@ public:
 	void join(participant_ptr participant);
 	void leave(participant_ptr participant);
 	void deliver(const message& msg);
-private:
 	std::set<participant_ptr> m_participants;
+private:
 };

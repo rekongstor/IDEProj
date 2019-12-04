@@ -1,6 +1,8 @@
 #include "session.h"
 
 #include <boost/bind.hpp>
+#include <iostream>
+using namespace std;
 
 session::session(boost::asio::io_service& io_service, room& room)
 	: m_socket(io_service),
@@ -15,6 +17,11 @@ tcp::socket& session::socket()
 
 void session::start()
 {
+	if (m_room.m_participants.size() > 1)
+	{
+		cout << "Member cannot join: " << shared_from_this() << endl;
+		return;
+	}
 	m_room.join(shared_from_this());
 	boost::asio::async_read(m_socket,
 		boost::asio::buffer(m_read_msg.data(), message::header_length),

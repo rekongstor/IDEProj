@@ -1,8 +1,7 @@
 #include "game.h"
 
-game::game(participant& mp1, participant& mp2) : m_participant_1(mp1), m_participant_2(mp2), m_field_1(), m_field_2(), game_state(preparation)
+game::game() : m_participant_1(nullptr), m_participant_2(nullptr), game_state(egs::preparation)
 {
-
 }
 
 bool game::place(int, int)

@@ -6,21 +6,21 @@
 class game
 {
 public:
-	enum egs
+	enum class egs
 	{
 		preparation,
 		turn_1,
 		turn_2,
 		end
 	};
-	game(participant&, participant&);
+	game();
 	bool place(int, int);
 	void set_state(egs);
 	bool turn(int, int);
 
 private:
-	participant& m_participant_1;
-	participant& m_participant_2;
+	participant* m_participant_1;
+	participant* m_participant_2;
 	field m_field_1;
 	field m_field_2;
 	egs game_state;
