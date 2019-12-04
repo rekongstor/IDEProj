@@ -69,9 +69,27 @@ void session::decode_body()
 		m_read_msg.encode_header();
 	};
 
+	auto game_finished = [&](field* f)
+	{
+		for (int x = 0; x < 10; ++x)
+			for (int y = 0; y < 10; ++y)
+				if ((f->get_cell(x, y) & cell::ship) && !(f->get_cell(x, y) & cell::shot)) // есть неподстрелянный корабль
+					return false;
+		return true;
+	};
+
+	auto swap_state = [&]()
+	{
+		if (m_room.m_game.m_participant_1 == this)
+			m_room.m_game.set_state(game::egs::turn_2);
+		else
+			m_room.m_game.set_state(game::egs::turn_1);
+	};
+
 	m_read_msg.body()[m_read_msg.body_length()] = 0; // тут нужно слегка отсечь ненужный кусок сообщения
 	string msg = m_read_msg.body(); // теперь обрабатываем сообщение через эту тему, а отправляемое оставляем в m_read_msg.body()
-	
+	cout << this << ": " << msg << endl;
+
 	if (m_room.m_game.get_state() == game::egs::preparation)
 	{
 		cout << "Preparation " << msg.size() << endl;
@@ -136,10 +154,80 @@ void session::decode_body()
 	}
 	if (m_room.m_game.get_state() == game::egs::turn_1 || m_room.m_game.get_state() == game::egs::turn_2)
 	{
+		cout << "Turns " << msg.size() << endl;
+		if ((m_room.m_game.get_state() == game::egs::turn_1 && m_room.m_game.m_participant_1 == this) || \
+			(m_room.m_game.get_state() == game::egs::turn_2 && m_room.m_game.m_participant_2 == this))
+		{
+			if (msg.size() == 3)
+				if (msg[0] >= '0' && msg[0] <= '9' && \
+					msg[1] == ' ' && \
+					msg[2] >= '0' && msg[2] <= '9')
+				{
+					field* my_field;
+					if (m_room.m_game.m_participant_1 == this)
+						my_field = &m_room.m_game.m_field_2;
+					else
+						my_field = &m_room.m_game.m_field_1;
+
+					int x = msg[0] - '0';
+					int y = msg[2] - '0';
+					int c = my_field->get_cell(x, y);
+					my_field->set_cell(x, y, c | cell::shot);
+
+
+					if (c & cell::shot)
+					{
+						cout << "Turn repeat - failed " << msg << endl;
+						set_msg("f"); // выстрел туда же?
+						deliver(m_read_msg);
+						return;
+					}
+
+					if (c & cell::ship)
+					{
+						cout << "Hit! " << msg << endl;
+						set_msg("h"); // попадание
+
+						if (game_finished(my_field))
+						{
+							cout << "GG " << msg << endl;
+							set_msg("g"); // победа
+							m_room.deliver(m_read_msg);
+							m_room.m_game.set_state(game::egs::end);
+							return;
+						}
+
+						deliver(m_read_msg);
+						return;
+					}
+					else
+					{
+						cout << "Miss " << msg << endl;
+						set_msg("m"); // промах
+						swap_state();
+						deliver(m_read_msg);
+						return;
+					}
+				}
+		}
+		else
+		{
+			cout << "Turn order - failed " << msg << endl;
+			set_msg("f"); // ход не в своё время
+			deliver(m_read_msg);
+			return;
+		}
+
+
 		m_room.deliver(m_read_msg);
 		return;
 	}
 
+	if (m_room.m_game.get_state() == game::egs::end)
+	{
+		m_room.deliver(m_read_msg);
+		return;
+	}
 	set_msg("f");
 	deliver(m_read_msg);
 	cout << this << ": " << msg << endl;
