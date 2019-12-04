@@ -11,7 +11,7 @@ class field
 public:
 	field();
 	const int& get_cell(int, int);
-	void set_cell(int, int, int);
+	bool set_cell(int, int, int);
 	void clear();
 
 private:
@@ -24,11 +24,16 @@ field::field()
 }
 const int& field::get_cell(int x, int y)
 {
+	if ((x < 0) || (x > 9) || (y < 0) || (y > 9))
+		return m_field[0][0];
 	return m_field[x][y];
 }
-void field::set_cell(int x, int y, int val)
+bool field::set_cell(int x, int y, int val)
 {
+	if ((x < 0) || (x > 9) || (y < 0) || (y > 9))
+		return false;
 	m_field[x][y] = val;
+	return true;
 }
 void field::clear()
 {
