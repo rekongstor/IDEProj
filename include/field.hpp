@@ -57,7 +57,7 @@ public:
 			if (!check_bound(x + i * (direction == 'h'), y + i * (direction == 'v')))
 				return false; // bound check
 
-		for (int i = -1; i < length + 1; ++i) 
+		for (int i = 0; i < length; ++i) 
 		{ //-1 and +1 for corners
 
 			if (check_bound(x + i * (direction == 'h'), y + i * (direction == 'v'))) // to be sure if we're in m_field boundaries
@@ -79,7 +79,36 @@ public:
 			if (check_bound(x + i * (direction == 'h'), y + i * (direction == 'v') - 1))
 				if (m_field[x + i * (direction == 'h')][y + i * (direction == 'v') - 1])
 					return false;
+
 		} // cross check
+
+
+		if (check_bound(x + 0 * (direction == 'h') - 1, y + 0 * (direction == 'v') - 1))
+			if (m_field[x + 0 * (direction == 'h') - 1][y + 0 * (direction == 'v') - 1])
+				return false;
+		if (check_bound(x + 0 * (direction == 'h') - 1, y + 0 * (direction == 'v') + 1))
+			if (m_field[x + 0 * (direction == 'h') - 1][y + 0 * (direction == 'v') + 1])
+				return false;
+		if (check_bound(x + 0 * (direction == 'h') + 1, y + 0 * (direction == 'v') - 1))
+			if (m_field[x + 0 * (direction == 'h') + 1][y + 0 * (direction == 'v') - 1])
+				return false;
+		if (check_bound(x + 0 * (direction == 'h') + 1, y + 0 * (direction == 'v') + 1))
+			if (m_field[x + 0 * (direction == 'h') + 1][y + 0 * (direction == 'v') + 1])
+				return false;
+
+		if (check_bound(x + length - 1 * (direction == 'h') - 1, y + length - 1 * (direction == 'v') - 1))
+			if (m_field[x + length - 1 * (direction == 'h') - 1][y + length - 1 * (direction == 'v') - 1])
+				return false;
+		if (check_bound(x + length - 1 * (direction == 'h') - 1, y + length - 1 * (direction == 'v') + 1))
+			if (m_field[x + length - 1 * (direction == 'h') - 1][y + length - 1 * (direction == 'v') + 1])
+				return false;
+		if (check_bound(x + length - 1 * (direction == 'h') + 1, y + length - 1 * (direction == 'v') - 1))
+			if (m_field[x + length - 1 * (direction == 'h') + 1][y + length - 1 * (direction == 'v') - 1])
+				return false;
+		if (check_bound(x + length - 1 * (direction == 'h') + 1, y + length - 1 * (direction == 'v') + 1))
+			if (m_field[x + length - 1 * (direction == 'h') + 1][y + length - 1 * (direction == 'v') + 1])
+				return false;
+		// check corners
 
 		switch (length)
 		{
