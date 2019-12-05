@@ -35,6 +35,23 @@ public:
 
 	bool set_ship(int x, int y, int length, char direction)
 	{
+		if ((length < 1 || length > 4) ||
+			(direction == 'v' && y + length > 9) ||
+			(direction == 'h' && x + length > 9))
+		{
+			return false;
+		}
+
+		for (int i = 0; i < length; ++i) {
+			if (m_field[x + i * (direction == 'h')][y + i * (direction == 'v')] == 1 ||
+				m_field[x + i * (direction == 'h') + 1][y + i * (direction == 'v')] == 1 ||
+				m_field[x + i * (direction == 'h') - 1][y + i * (direction == 'v')] == 1 ||
+				m_field[x + i * (direction == 'h')][y + i * (direction == 'v') + 1] == 1 ||
+				m_field[x + i * (direction == 'h')][y + i * (direction == 'v') - 1] == 1) {
+				return false;
+			}
+		}
+
 		for (int i = 0; i < length; ++i)
 		{
 			set_cell(x + i * (direction == 'h'), y + i * (direction == 'v'), cell::ship);
