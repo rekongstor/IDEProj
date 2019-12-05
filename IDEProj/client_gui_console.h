@@ -4,22 +4,25 @@
 class client_gui_console
 {
 public:
-	enum class state
+	enum class egs
 	{
 		preparation,
-		turns,
+		my_turn,
+		enemy_turn,
 		end
 	};
 
 
-	client_gui_console();
-	void clear();
+	client_gui_console (field* my, field* en);
 	void draw();
-	state get_state();
-	void set_state(state st);
+	void set_state(egs st);
 
 private:
-	state m_client_state;
-	void draw_own_grid(field* my);
-	void draw_game_grid(field* my, field* en);
+	egs m_client_state;
+	field* m_my;
+	field* m_en;
+	void draw_own_grid();
+	void draw_game_grid();
+	void draw_field_cell(int c);
+	void clear();
 };
