@@ -8,6 +8,8 @@
 #include <boost/thread/thread.hpp>
 
 #include "message.hpp"
+#include "client_gui_console.h"
+#include "field.hpp"
 
 using boost::asio::ip::tcp;
 typedef std::deque<message> message_queue;
@@ -20,11 +22,19 @@ public:
 	void write(const message& msg);
 	void close();
 
+	client_gui_console m_gui;
+	client_gui_console::egs state;
+	bool receive;
+	bool ready;
+	bool second_turn;
+	field m_my;
+	field m_en;
 private:
 
 	void handle_connect(const boost::system::error_code& error);
 	void handle_read_header(const boost::system::error_code& error);
 	void handle_read_body(const boost::system::error_code& error);
+	void decode_message();
 	void do_write(message msg);
 	void handle_write(const boost::system::error_code& error);
 	void do_close();

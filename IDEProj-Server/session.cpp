@@ -110,7 +110,13 @@ void session::decode_body()
 				else
 					my_field = &m_room.m_game.m_field_2;
 
-				my_field->set_ship(msg[2] - '0', msg[4] - '0', msg[6] - '0', msg[8]);
+				if (!my_field->set_ship(msg[2] - '0', msg[4] - '0', msg[6] - '0', msg[8]))
+				{
+					set_msg("f");
+					cout << "Placement error"<< endl;
+					deliver(m_read_msg);
+					return;
+				}
 
 				set_msg("d");
 				deliver(m_read_msg);
@@ -127,6 +133,8 @@ void session::decode_body()
 
 				if (m_room.m_game.m_p1_ready && m_room.m_game.m_p2_ready)
 				{
+					set_msg("t");
+					deliver(m_read_msg);
 					set_msg("d");
 					m_room.m_game.set_state(game::egs::turn_1);
 					m_room.deliver(m_read_msg);
@@ -186,7 +194,10 @@ void session::decode_body()
 					if (c & cell::ship)
 					{
 						cout << "Hit! " << msg << endl;
-						set_msg("h"); // попадание
+						char sh[] = "h x y";
+						sh[2] = '0' + x;
+						sh[4] = '0' + y;
+						set_msg(sh); // попадание
 
 						if (game_finished(my_field))
 						{
@@ -197,15 +208,18 @@ void session::decode_body()
 							return;
 						}
 
-						deliver(m_read_msg);
+						m_room.deliver(m_read_msg);
 						return;
 					}
 					else
 					{
 						cout << "Miss " << msg << endl;
-						set_msg("m"); // промах
+						char sh[] = "m x y";
+						sh[2] = '0' + x;
+						sh[4] = '0' + y;
+						set_msg(sh); // попадание
 						swap_state();
-						deliver(m_read_msg);
+						m_room.deliver(m_read_msg);
 						return;
 					}
 				}

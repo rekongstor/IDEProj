@@ -16,6 +16,7 @@ public:
 	client_gui_console (field* my, field* en);
 	void draw();
 	void set_state(egs st);
+	egs get_state();
 
 private:
 	egs m_client_state;

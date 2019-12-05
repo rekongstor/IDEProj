@@ -95,3 +95,7 @@ void client_gui_console::draw_own_grid()
 	cout << endl;
 }
 
+client_gui_console::egs client_gui_console::get_state()
+{
+	return m_client_state;
+}
