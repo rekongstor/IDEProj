@@ -84,8 +84,10 @@ void client_gui_console::draw_game_grid()
 
 void client_gui_console::draw_own_grid()
 {
+	cout << "\x1B[95m  x 0 1 2 3 4 5 6 7 8 9\n\x1B[92my   \x1B[95m___________________\n";
 	for (int y = 0; y < 10; ++y)
 	{
+		cout << "\x1B[92m" << y << "|  \x1B[0m";
 		for (int x = 0; x < 10; ++x)
 			draw_field_cell(m_my->get_cell(x, y));
 		cout << endl;
