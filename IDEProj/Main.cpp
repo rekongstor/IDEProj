@@ -66,6 +66,7 @@ int main(int argc, char* argv[])
 					{
 						if (!c.m_my.set_ship(line[2] - '0', line[4] - '0', line[6] - '0', line[8]))
 						{
+							c.m_gui.draw();
 							cout << "\x1B[31mInvalid placement!\x1B[0m" << endl;
 							continue;
 						}
@@ -77,10 +78,19 @@ int main(int argc, char* argv[])
 
 					if (strlen(line) == 1 && line[0] == 'r')
 					{
-						c.ready = true;
-						c.write(msg);
-						c.receive = true;
-						continue;
+						if (c.m_my.ships_ready())
+						{
+							c.ready = true;
+							c.write(msg);
+							c.receive = true;
+							continue;
+						}
+						else
+						{
+							c.m_gui.draw();
+							cout << "\x1B[31mShips not ready!\x1B[0m" << endl;
+							continue;
+						}
 					}
 					c.m_gui.draw();
 					cout << "\x1B[31mInvalid input!\x1B[0m" << endl;

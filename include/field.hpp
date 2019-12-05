@@ -9,7 +9,7 @@ enum cell
 class field
 {
 public:
-	field()
+	field(): m_1(0), m_2(0), m_3(0), m_4(0)
 	{
 		clear();
 	}
@@ -31,6 +31,11 @@ public:
 		for (auto& i : m_field)
 			for (auto& j : i)
 				j = 0;
+	}
+
+	bool ships_ready()
+	{
+		return (m_1 == 4 && m_2 == 3 && m_3 == 2 && m_4 == 1);
 	}
 
 	bool set_ship(int x, int y, int length, char direction)
@@ -76,6 +81,36 @@ public:
 					return false;
 		} // cross check
 
+		switch (length)
+		{
+		case 1:
+			if (m_1 == 4)
+				return false;
+			else
+				++m_1;
+			break;
+		case 2:
+			if (m_2 == 3)
+				return false;
+			else
+				++m_1;
+			break;
+		case 3:
+			if (m_3 == 2)
+				return false;
+			else
+				++m_1;
+			break;
+		case 4:
+			if (m_4 == 1)
+				return false;
+			else
+				++m_1;
+			break;
+		default:
+			break;
+		}
+
 		for (int i = 0; i < length; ++i)
 		{
 			set_cell(x + i * (direction == 'h'), y + i * (direction == 'v'), cell::ship);
@@ -85,4 +120,5 @@ public:
 
 private:
 	int m_field[10][10];
+	int m_1, m_2, m_3, m_4;
 };
