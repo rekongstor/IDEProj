@@ -70,6 +70,9 @@ void client::close()
 			if (status[0] == 'g') {
 				std::cout << "The game is over.";
 			}
+			if (status[0] == 't') {
+				std::cout << "The opponent’s move. Wait...";
+			}
 			boost::asio::async_read(m_socket,
 				boost::asio::buffer(m_read_msg.data(), message::header_length),
 				boost::bind(&client::handle_read_header, this,
