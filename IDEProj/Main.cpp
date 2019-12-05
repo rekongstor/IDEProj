@@ -41,38 +41,63 @@ int main(int argc, char* argv[])
 
 		client c(io_service, iterator);
 
+		
+
 		boost::thread t(boost::bind(&boost::asio::io_service::run, &io_service));
 
 		char line[message::max_body_length + 1];
 		while (std::cin.getline(line, message::max_body_length + 1))
 		{
-			using namespace std; // For strlen and memcpy.
-			message msg;
-			msg.body_length(strlen(line));
-			memcpy(msg.body(), line, msg.body_length());
-			msg.encode_header();
+			// we want to check our input if we are't waiting for server message
+			if (!c.receive)
+			{
+				using namespace std; // For strlen and memcpy.
+				message msg;
+				msg.body_length(strlen(line));
+				memcpy(msg.body(), line, msg.body_length());
+				msg.encode_header();
 
-			if (c.get_status() == 'd') {
-				if ((strlen(line) == 9 && line[0] == 's' && line[2] >= 48 &&
-					line[2] <= 57 && line[4] >= 48 && line[4] <= 57 &&
-					line[6] >= 49 && line[6] <= 52)  && (line[8] == 'v' || line[8] == 'h')) {
-				}
-				else {
-					cout << "Invalid command!";
-					continue;
-				}
-			} else {
-				if (c.get_status() == 'r') {
-					if (strlen(line) == 3 && line[0] >= 48 && line[0] <= 57 &&
-						line[2] >= 48 && line[2] <= 57) {
-					}
-					else {
-						cout << "Invalid command!";
+				if (c.m_gui.get_state() == client_gui_console::egs::preparation)
+				{
+					if ((strlen(line) == 9 && line[0] == 's' && line[2] >= '0' &&
+						line[2] <= '9' && line[4] >= '0' && line[4] <= '9' &&
+						line[6] >= '1' && line[6] <= '4') && (line[8] == 'v' || line[8] == 'h'))
+					{
+						if (!c.m_my.set_ship(line[2] - '0', line[4] - '0', line[6] - '0', line[8]))
+						{
+							cout << "Invalid placement!" << endl;
+							continue;
+						}
+						// we want to check here our placement
+						c.write(msg);
+						c.receive = true;
+						continue;
+					} // s x y w d command
+
+					if (strlen(line) == 1 && line[0] == 'r')
+					{
+						c.ready = true;
+						c.write(msg);
+						c.receive = true;
 						continue;
 					}
+					cout << "Invalid input!" << endl;
+					// otherwise we don't send anything
+				}
+
+				// turns
+				if (c.m_gui.get_state() == client_gui_console::egs::my_turn)
+				{
+					if (strlen(line) == 3 && line[0] >= '0' && line[0] <= '9' &&
+						line[2] >= '0' && line[2] <= '9')
+					{
+						c.write(msg);
+						c.receive = true;
+						continue;
+					}
+					// otherwise we don't send anything
 				}
 			}
-			c.write(msg);
 		}
 
 		c.close();
