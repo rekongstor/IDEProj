@@ -110,7 +110,13 @@ void session::decode_body()
 				else
 					my_field = &m_room.m_game.m_field_2;
 
-				my_field->set_ship(msg[2] - '0', msg[4] - '0', msg[6] - '0', msg[8]);
+				if (!my_field->set_ship(msg[2] - '0', msg[4] - '0', msg[6] - '0', msg[8]))
+				{
+					set_msg("f");
+					cout << "Placement error"<< endl;
+					deliver(m_read_msg);
+					return;
+				}
 
 				set_msg("d");
 				deliver(m_read_msg);
