@@ -127,6 +127,8 @@ void session::decode_body()
 
 				if (m_room.m_game.m_p1_ready && m_room.m_game.m_p2_ready)
 				{
+					set_msg("t");
+					deliver(m_read_msg);
 					set_msg("d");
 					m_room.m_game.set_state(game::egs::turn_1);
 					m_room.deliver(m_read_msg);
