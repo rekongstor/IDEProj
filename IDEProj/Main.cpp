@@ -46,6 +46,7 @@ int main(int argc, char* argv[])
 		boost::thread t(boost::bind(&boost::asio::io_service::run, &io_service));
 
 		char line[message::max_body_length + 1];
+		c.m_gui.draw();
 		while (std::cin.getline(line, message::max_body_length + 1))
 		{
 			// we want to check our input if we are't waiting for server message
@@ -65,7 +66,7 @@ int main(int argc, char* argv[])
 					{
 						if (!c.m_my.set_ship(line[2] - '0', line[4] - '0', line[6] - '0', line[8]))
 						{
-							cout << "Invalid placement!" << endl;
+							cout << "\x1B[31mInvalid placement!\x1B[0m" << endl;
 							continue;
 						}
 						// we want to check here our placement
@@ -81,7 +82,8 @@ int main(int argc, char* argv[])
 						c.receive = true;
 						continue;
 					}
-					cout << "Invalid input!" << endl;
+					c.m_gui.draw();
+					cout << "\x1B[31mInvalid input!\x1B[0m" << endl;
 					// otherwise we don't send anything
 				}
 
@@ -96,6 +98,12 @@ int main(int argc, char* argv[])
 						continue;
 					}
 					// otherwise we don't send anything
+				}
+
+				if (c.m_gui.get_state() == client_gui_console::egs::end)
+				{
+					c.write(msg);
+					continue;
 				}
 			}
 		}

@@ -62,7 +62,9 @@ void client::decode_message()
 		{
 			if (msg == "t") // our turn is second
 			{
+				m_gui.draw();
 				second_turn = true;
+				receive = false;
 				return;
 			}
 			if (msg == "d") // Usual 
@@ -73,6 +75,7 @@ void client::decode_message()
 				else
 					m_gui.set_state(client_gui_console::egs::my_turn);
 
+				m_gui.draw();
 				return;
 			}
 		}
@@ -80,11 +83,13 @@ void client::decode_message()
 		{
 			if (msg == "d") // Usual 
 			{
+				m_gui.draw();
 				receive = false;
 				return;
 			}
 			if (msg == "f") // shouldn't happen
 			{
+				m_gui.draw();
 				receive = false;
 				cout << "Server error happened. This is really bad." << endl;
 				return;
@@ -98,13 +103,31 @@ void client::decode_message()
 		if (msg[0] == 'h')
 		{
 			m_en.set_cell(msg[2] - '0', msg[4] - '0', cell::ship | cell::shot);
+			m_gui.draw();
 			receive = false; // продолжаем стрел€ть
 		}
 		if (msg[0] == 'm')
 		{
 			m_en.set_cell(msg[2] - '0', msg[4] - '0', cell::shot);
-			m_gui.set_state(client_gui_console::egs::enemy_turn); 
+			m_gui.set_state(client_gui_console::egs::enemy_turn);
+			m_gui.draw();
 			receive = false; // передаЄм ход сопернику
+		}
+		if (msg[0] == 'g') // не должно происходить
+		{
+			m_en.set_cell(msg[2] - '0', msg[4] - '0', cell::ship | cell::shot);
+			m_gui.set_state(client_gui_console::egs::end);
+			m_gui.draw();
+			cout << "\x1B[92mYou won!\x1B[0m" << endl;
+			receive = false; // продолжаем стрел€ть
+		}
+		if (msg[0] == 'f') // не должно происходить
+		{
+			m_gui.draw();
+			cout << "\x1B[93m";
+			cout << "Turn repeat" << endl;
+			cout << "\x1B[0m";
+			receive = false; // продолжаем стрел€ть
 		}
 		return;
 	}
@@ -113,49 +136,40 @@ void client::decode_message()
 		if (msg[0] == 'h') 
 		{
 			m_my.set_cell(msg[2] - '0', msg[4] - '0', cell::ship | cell::shot);
+			m_gui.draw();
 			receive = false; // продолжаем стрел€ть
 		}
 		if (msg[0] == 'm')
 		{
 			m_my.set_cell(msg[2] - '0', msg[4] - '0', cell::shot);
 			m_gui.set_state(client_gui_console::egs::my_turn);
+			m_gui.draw();
 			receive = false; // передаЄм ход сопернику
 		}
 		if (msg[0] == 'f') // не должно происходить
 		{
+			m_gui.draw();
 			cout << "Not your turn"; 
 			receive = false; // продолжаем стрел€ть
 		}
-		if (msg[0] == 'g') // не должно происходить
+		if (msg[0] == 'g') 
 		{
+			m_my.set_cell(msg[2] - '0', msg[4] - '0', cell::ship | cell::shot);
 			m_gui.set_state(client_gui_console::egs::end);
-			receive = false; // продолжаем стрел€ть
+			m_gui.draw();
+			cout << "\x1B[91mYou lost!\x1B[0m" << endl;
+			receive = false; 
 		}
 		return;
 	}
 	if (m_gui.get_state() == client_gui_console::egs::end) // we'r ereceiving end messages
 	{
-		receive = false; // продолжаем стрел€ть
+		cout << "\x1B[93m";
+		std::cout.write(m_read_msg.body(), m_read_msg.body_length());
+		std::cout << "\n";
+		cout << "\x1B[0m";
 		return;
 	}
-	//if (status[0] == 'r') {
-	//	std::cout << "Placement completed successfully.";
-	//}
-	//if (status[0] == 'h') {
-	//	std::cout << "Successful hit!";
-	//}
-	//if (status[0] == 'm') {
-	//	std::cout << "Oops! Missed.";
-	//}
-	//if (status[0] == 'f') {
-	//	std::cout << "This is not your turn! Wait...";
-	//}
-	//if (status[0] == 'g') {
-	//	std::cout << "The game is over.";
-	//}
-	//if (status[0] == 't') {
-	//	std::cout << "The opponentТs move. Wait...";
-	//}
 }
 
 void client::handle_read_body(const boost::system::error_code& error)
@@ -163,8 +177,8 @@ void client::handle_read_body(const boost::system::error_code& error)
 	if (!error)
 	{
 		decode_message();
-		std::cout.write(m_read_msg.body(), m_read_msg.body_length());
-		std::cout << "\n";
+		//std::cout.write(m_read_msg.body(), m_read_msg.body_length());
+		//std::cout << "\n";
 
 
 		boost::asio::async_read(m_socket,

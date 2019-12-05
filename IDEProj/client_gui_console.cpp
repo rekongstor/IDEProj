@@ -12,7 +12,7 @@ client_gui_console::client_gui_console(field* my, field* en)
 
 void client_gui_console::clear()
 {
-	system("clear");
+	system("cls");
 }
 
 void client_gui_console::draw()
@@ -44,6 +44,7 @@ void client_gui_console::draw()
 		draw_game_grid();
 		//cout << "Enter ship location in the following format:\ns x y w d\nWhere\nx - x coordinate [0-9]\ny - y coordinate [0-9]\nw - width of the ship [1-4]\nd - direction of the ship [v/h]\n";
 	}
+	cout << "\x1B[0m";
 }
 
 void client_gui_console::set_state(egs st)
