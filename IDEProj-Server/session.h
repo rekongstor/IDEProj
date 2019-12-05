@@ -25,6 +25,8 @@ private:
 	room& m_room;
 	message m_read_msg;
 	message_queue m_write_msgs_queue;
+
+	void decode_body();
 };
 
 
