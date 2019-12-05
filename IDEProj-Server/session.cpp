@@ -136,7 +136,11 @@ void session::decode_body()
 					set_msg("t");
 					deliver(m_read_msg);
 					set_msg("d");
-					m_room.m_game.set_state(game::egs::turn_1);
+
+					if (m_room.m_game.m_participant_1 == this)
+						m_room.m_game.set_state(game::egs::turn_2);
+					else
+						m_room.m_game.set_state(game::egs::turn_1);
 					m_room.deliver(m_read_msg);
 
 					for (int y = 0; y < 10; ++y)
@@ -202,7 +206,10 @@ void session::decode_body()
 						if (game_finished(my_field))
 						{
 							cout << "GG " << msg << endl;
-							set_msg("g"); // победа
+							char sh[] = "g x y";
+							sh[2] = '0' + x;
+							sh[4] = '0' + y;
+							set_msg(sh); // победа
 							m_room.deliver(m_read_msg);
 							m_room.m_game.set_state(game::egs::end);
 							return;
@@ -239,7 +246,10 @@ void session::decode_body()
 
 	if (m_room.m_game.get_state() == game::egs::end)
 	{
-		m_room.deliver(m_read_msg);
+		for (auto& p : m_room.m_participants)
+			if (p.get() != this)
+				p->deliver(m_read_msg); // отправим сообщение противнику
+
 		return;
 	}
 	set_msg("f");
