@@ -98,17 +98,17 @@ public:
 			if (m_field[x + 0 * (direction == 'h') + 1][y + 0 * (direction == 'v') + 1])
 				return false;
 
-		if (check_bound(x + length - 1 * (direction == 'h') - 1, y + length - 1 * (direction == 'v') - 1))
-			if (m_field[x + length - 1 * (direction == 'h') - 1][y + length - 1 * (direction == 'v') - 1])
+		if (check_bound(x + (length - 1) * (direction == 'h') - 1, y + (length - 1) * (direction == 'v') - 1))
+			if (m_field[x + (length - 1) * (direction == 'h') - 1][y + (length - 1) * (direction == 'v') - 1])
 				return false;
-		if (check_bound(x + length - 1 * (direction == 'h') - 1, y + length - 1 * (direction == 'v') + 1))
-			if (m_field[x + length - 1 * (direction == 'h') - 1][y + length - 1 * (direction == 'v') + 1])
+		if (check_bound(x + (length - 1) * (direction == 'h') - 1, y + (length - 1) * (direction == 'v') + 1))
+			if (m_field[x + (length - 1) * (direction == 'h') - 1][y + (length - 1) * (direction == 'v') + 1])
 				return false;
-		if (check_bound(x + length - 1 * (direction == 'h') + 1, y + length - 1 * (direction == 'v') - 1))
-			if (m_field[x + length - 1 * (direction == 'h') + 1][y + length - 1 * (direction == 'v') - 1])
+		if (check_bound(x + (length - 1) * (direction == 'h') + 1, y + (length - 1) * (direction == 'v') - 1))
+			if (m_field[x + (length - 1) * (direction == 'h') + 1][y + (length - 1) * (direction == 'v') - 1])
 				return false;
-		if (check_bound(x + length - 1 * (direction == 'h') + 1, y + length - 1 * (direction == 'v') + 1))
-			if (m_field[x + length - 1 * (direction == 'h') + 1][y + length - 1 * (direction == 'v') + 1])
+		if (check_bound(x + (length - 1) * (direction == 'h') + 1, y + (length - 1) * (direction == 'v') + 1))
+			if (m_field[x + (length - 1) * (direction == 'h') + 1][y + (length - 1) * (direction == 'v') + 1])
 				return false;
 		// check corners
 
