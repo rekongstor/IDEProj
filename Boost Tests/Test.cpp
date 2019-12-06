@@ -50,4 +50,9 @@ BOOST_AUTO_TEST_CASE(set_ship_cases)
 	BOOST_TEST(test_f.set_ship(7, 3, 4, 'v') == false);
 	BOOST_TEST(test_f.set_ship(7, 3, 4, 'h') == false);
 	BOOST_TEST(test_f.set_ship(7, 3, 3, 'h') == true);
+
+	BOOST_TEST(test_f.set_ship(0, 0, 4, 'h') == false); // other 4 length, max 1
+
+	BOOST_TEST(test_f.set_ship(0, 0, 3, 'h') == true);
+	BOOST_TEST(test_f.set_ship(0, 9, 3, 'h') == false); // other 3 length, max 2
 }
