@@ -124,19 +124,19 @@ public:
 			if (m_2 == 3)
 				return false;
 			else
-				++m_1;
+				++m_2;
 			break;
 		case 3:
 			if (m_3 == 2)
 				return false;
 			else
-				++m_1;
+				++m_3;
 			break;
 		case 4:
 			if (m_4 == 1)
 				return false;
 			else
-				++m_1;
+				++m_4;
 			break;
 		default:
 			break;
