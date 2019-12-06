@@ -1,24 +1,38 @@
 #pragma once
-
+/// <summary>
+/// Энумератор-битовая маска для клетки поля
+/// </summary>
 enum cell
 {
 	ship = 1 << 0,
 	shot = 1 << 1
 };
 
+/// <summary>
+/// Класс игрового поля
+/// </summary>
 class field
 {
 public:
+	/// <summary>
+	/// Конструктор создания игрового поля
+	/// </summary>
 	field(): m_1(0), m_2(0), m_3(0), m_4(0)
 	{
 		clear();
 	}
+	/// <summary>
+	/// Функция, возвращающся значение клетки поля
+	/// </summary>
 	const int& get_cell(int x, int y)
 	{
 		if ((x < 0) || (x > 9) || (y < 0) || (y > 9))
 			return m_field[0][0];
 		return m_field[x][y];
 	}
+	/// <summary>
+	/// Функция, устанавливающая значение клетки поля. Возвращает true в случае успеха
+	/// </summary>
 	bool set_cell(int x , int y, int val)
 	{
 		if ((x < 0) || (x > 9) || (y < 0) || (y > 9))
@@ -26,6 +40,9 @@ public:
 		m_field[x][y] = val;
 		return true;
 	}
+	/// <summary>
+	/// Метод для очистки поля
+	/// </summary>
 	void clear()
 	{
 		for (auto& i : m_field)
@@ -33,11 +50,16 @@ public:
 				j = 0;
 	}
 
+	/// <summary>
+	/// Функция, возвращающся true, если координата не выходит за пределы поля
+	/// </summary>
 	bool check_bound(int x, int y)
 	{
 		return (x >= 0 && x <= 9 && y >= 0 && y <= 9);
 	};
-
+	/// <summary>
+	/// Функция, возвращающся true, если корабль по данным координатам убит
+	/// </summary>
 	bool check_kill(int x, int y)
 	{
 		// find ship start
@@ -66,7 +88,9 @@ public:
 				return true;
 		}
 	}
-
+	/// <summary>
+	/// Метод, устанавливающий вокруг убитого корабля промахи
+	/// </summary>
 	void kill(int x, int y)
 	{
 		// find ship start
@@ -110,7 +134,9 @@ public:
 				return;
 		}
 	}
-
+	/// <summary>
+	/// Функция, возвращающая true в случае, если расставлены все корабли на поле. В Debug конфигурации всегда возвращает true
+	/// </summary>
 	bool ships_ready()
 	{
 #ifdef NDEBUG
@@ -118,7 +144,9 @@ public:
 #endif
 		return (m_1 == 4 && m_2 == 3 && m_3 == 2 && m_4 == 1);
 	}
-
+	/// <summary>
+	/// Функция, устанавливающая корабль по заданным координатам, направлению и длине корабля. Возвращает true в случае успеха
+	/// </summary>
 	bool set_ship(int x, int y, int length, char direction)
 	{
 		if ((direction != 'h') && (direction != 'v'))
