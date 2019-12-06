@@ -1,4 +1,4 @@
-
+п»ї
 #include "client.h"
 #include <string>
 
@@ -104,30 +104,38 @@ void client::decode_message()
 		{
 			m_en.set_cell(msg[2] - '0', msg[4] - '0', cell::ship | cell::shot);
 			m_gui.draw();
-			receive = false; // продолжаем стрелять
+			receive = false; // РїСЂРѕРґРѕР»Р¶Р°РµРј СЃС‚СЂРµР»СЏС‚СЊ
+		}
+		if (msg[0] == 'k')
+		{
+			m_en.set_cell(msg[2] - '0', msg[4] - '0', cell::ship | cell::shot);
+			m_en.kill(msg[2] - '0', msg[4] - '0');
+			m_gui.draw();
+			receive = false; // РїСЂРѕРґРѕР»Р¶Р°РµРј СЃС‚СЂРµР»СЏС‚СЊ
 		}
 		if (msg[0] == 'm')
 		{
 			m_en.set_cell(msg[2] - '0', msg[4] - '0', cell::shot);
 			m_gui.set_state(client_gui_console::egs::enemy_turn);
 			m_gui.draw();
-			receive = false; // передаём ход сопернику
+			receive = false; // РїРµСЂРµРґР°С‘Рј С…РѕРґ СЃРѕРїРµСЂРЅРёРєСѓ
 		}
-		if (msg[0] == 'g') // не должно происходить
+		if (msg[0] == 'g') // РЅРµ РґРѕР»Р¶РЅРѕ РїСЂРѕРёСЃС…РѕРґРёС‚СЊ
 		{
 			m_en.set_cell(msg[2] - '0', msg[4] - '0', cell::ship | cell::shot);
+			m_en.kill(msg[2] - '0', msg[4] - '0');
 			m_gui.set_state(client_gui_console::egs::end);
 			m_gui.draw();
 			cout << "\x1B[92mYou won!\x1B[0m" << endl;
-			receive = false; // продолжаем стрелять
+			receive = false; // РїСЂРѕРґРѕР»Р¶Р°РµРј СЃС‚СЂРµР»СЏС‚СЊ
 		}
-		if (msg[0] == 'f') // не должно происходить
+		if (msg[0] == 'f') // РЅРµ РґРѕР»Р¶РЅРѕ РїСЂРѕРёСЃС…РѕРґРёС‚СЊ
 		{
 			m_gui.draw();
 			cout << "\x1B[93m";
 			cout << "Turn repeat" << endl;
 			cout << "\x1B[0m";
-			receive = false; // продолжаем стрелять
+			receive = false; // РїСЂРѕРґРѕР»Р¶Р°РµРј СЃС‚СЂРµР»СЏС‚СЊ
 		}
 		return;
 	}
@@ -137,24 +145,32 @@ void client::decode_message()
 		{
 			m_my.set_cell(msg[2] - '0', msg[4] - '0', cell::ship | cell::shot);
 			m_gui.draw();
-			receive = false; // продолжаем стрелять
+			receive = false; // РїСЂРѕРґРѕР»Р¶Р°РµРј СЃС‚СЂРµР»СЏС‚СЊ
+		}
+		if (msg[0] == 'k')
+		{
+			m_my.set_cell(msg[2] - '0', msg[4] - '0', cell::ship | cell::shot);
+			m_my.kill(msg[2] - '0', msg[4] - '0');
+			m_gui.draw();
+			receive = false; // РїСЂРѕРґРѕР»Р¶Р°РµРј СЃС‚СЂРµР»СЏС‚СЊ
 		}
 		if (msg[0] == 'm')
 		{
 			m_my.set_cell(msg[2] - '0', msg[4] - '0', cell::shot);
 			m_gui.set_state(client_gui_console::egs::my_turn);
 			m_gui.draw();
-			receive = false; // передаём ход сопернику
+			receive = false; // РїРµСЂРµРґР°С‘Рј С…РѕРґ СЃРѕРїРµСЂРЅРёРєСѓ
 		}
-		if (msg[0] == 'f') // не должно происходить
+		if (msg[0] == 'f') // РЅРµ РґРѕР»Р¶РЅРѕ РїСЂРѕРёСЃС…РѕРґРёС‚СЊ
 		{
 			m_gui.draw();
 			cout << "Not your turn"; 
-			receive = false; // продолжаем стрелять
+			receive = false; // РїСЂРѕРґРѕР»Р¶Р°РµРј СЃС‚СЂРµР»СЏС‚СЊ
 		}
 		if (msg[0] == 'g') 
 		{
 			m_my.set_cell(msg[2] - '0', msg[4] - '0', cell::ship | cell::shot);
+			m_my.kill(msg[2] - '0', msg[4] - '0');
 			m_gui.set_state(client_gui_console::egs::end);
 			m_gui.draw();
 			cout << "\x1B[91mYou lost!\x1B[0m" << endl;
