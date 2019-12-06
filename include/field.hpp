@@ -40,6 +40,8 @@ public:
 
 	bool set_ship(int x, int y, int length, char direction)
 	{
+		if (direction != 'h' || direction != 'v')
+			return false;
 
 		auto check_bound = [](int x, int y)
 		{
