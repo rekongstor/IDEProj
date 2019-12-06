@@ -85,21 +85,21 @@ public:
 				if (check_bound(x - 1, y - 1))
 					m_field[x - 1][y - 1] |= cell::shot;
 				if (check_bound(x - 0, y - 1))
-					m_field[x - 1][y - 1] |= cell::shot;
+					m_field[x - 0][y - 1] |= cell::shot;
 				if (check_bound(x + 1, y - 1))
-					m_field[x - 1][y - 1] |= cell::shot;
+					m_field[x + 1][y - 1] |= cell::shot;
 
 				if (check_bound(x - 1, y - 0))
-					m_field[x - 1][y - 1] |= cell::shot;
+					m_field[x - 1][y - 0] |= cell::shot;
 				if (check_bound(x + 1, y - 0))
-					m_field[x - 1][y - 1] |= cell::shot;
+					m_field[x + 1][y - 0] |= cell::shot;
 
 				if (check_bound(x - 1, y + 1))
-					m_field[x - 1][y - 1] |= cell::shot;
+					m_field[x - 1][y + 1] |= cell::shot;
 				if (check_bound(x - 0, y + 1))
-					m_field[x - 1][y - 1] |= cell::shot;
+					m_field[x - 0][y + 1] |= cell::shot;
 				if (check_bound(x + 1, y + 1))
-					m_field[x - 1][y - 1] |= cell::shot;
+					m_field[x + 1][y + 1] |= cell::shot;
 
 				if (m_field[x + 1][y] & cell::ship)
 					++x;
@@ -113,6 +113,9 @@ public:
 
 	bool ships_ready()
 	{
+#ifdef NDEBUG
+		return true;
+#endif
 		return (m_1 == 4 && m_2 == 3 && m_3 == 2 && m_4 == 1);
 	}
 
