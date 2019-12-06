@@ -14,7 +14,9 @@
 using boost::asio::ip::tcp;
 typedef std::deque<message> message_queue;
 
-
+/// <summary>
+/// Класс клиента
+/// </summary>
 class client
 {
 public:

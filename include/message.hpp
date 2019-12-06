@@ -1,9 +1,12 @@
-#pragma once
+п»ї#pragma once
 
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 
+/// <summary>
+/// РљР»Р°СЃСЃ СЃРѕРѕР±С‰РµРЅРёСЏ
+/// </summary>
 class message
 {
 public:
@@ -15,49 +18,49 @@ public:
 	{
 	}
 	/// <summary>
-	/// Возвращает поле data_ из сообщения как cnost char*
+	/// Р’РѕР·РІСЂР°С‰Р°РµС‚ РїРѕР»Рµ data_ РёР· СЃРѕРѕР±С‰РµРЅРёСЏ РєР°Рє cnost char*
 	/// </summary>
 	const char* data() const
 	{
 		return data_;
 	}
 	/// <summary>
-	/// Возвращает поле data_ из сообщения как char* 
+	/// Р’РѕР·РІСЂР°С‰Р°РµС‚ РїРѕР»Рµ data_ РёР· СЃРѕРѕР±С‰РµРЅРёСЏ РєР°Рє char* 
 	/// </summary>
 	char* data()
 	{
 		return data_;
 	}
 	/// <summary>
-	/// Возвращает длину сообщения
+	/// Р’РѕР·РІСЂР°С‰Р°РµС‚ РґР»РёРЅСѓ СЃРѕРѕР±С‰РµРЅРёСЏ
 	/// </summary>
 	size_t length() const
 	{
 		return header_length + body_length_;
 	}
 	/// <summary>
-	/// Возвращает const char* указатель на текст сообщения
+	/// Р’РѕР·РІСЂР°С‰Р°РµС‚ const char* СѓРєР°Р·Р°С‚РµР»СЊ РЅР° С‚РµРєСЃС‚ СЃРѕРѕР±С‰РµРЅРёСЏ
 	/// </summary>
 	const char* body() const
 	{
 		return data_ + header_length;
 	}
 	/// <summary>
-	/// Возвращает char* указатель на текст сообщения
+	/// Р’РѕР·РІСЂР°С‰Р°РµС‚ char* СѓРєР°Р·Р°С‚РµР»СЊ РЅР° С‚РµРєСЃС‚ СЃРѕРѕР±С‰РµРЅРёСЏ
 	/// </summary>
 	char* body()
 	{
 		return data_ + header_length;
 	}
 	/// <summary>
-	/// Возвращает длину текста сообщения
+	/// Р’РѕР·РІСЂР°С‰Р°РµС‚ РґР»РёРЅСѓ С‚РµРєСЃС‚Р° СЃРѕРѕР±С‰РµРЅРёСЏ
 	/// </summary>
 	size_t body_length() const
 	{
 		return body_length_;
 	}
 	/// <summary>
-	/// Устанавливает длину текста сообщения
+	/// РЈСЃС‚Р°РЅР°РІР»РёРІР°РµС‚ РґР»РёРЅСѓ С‚РµРєСЃС‚Р° СЃРѕРѕР±С‰РµРЅРёСЏ
 	/// </summary>
 	void body_length(size_t new_length)
 	{
@@ -66,7 +69,7 @@ public:
 			body_length_ = max_body_length;
 	}
 	/// <summary>
-	/// Декодирование сообщения из заголовка
+	/// Р”РµРєРѕРґРёСЂРѕРІР°РЅРёРµ СЃРѕРѕР±С‰РµРЅРёСЏ РёР· Р·Р°РіРѕР»РѕРІРєР°
 	/// </summary>
 	bool decode_header()
 	{
@@ -82,7 +85,7 @@ public:
 		return true;
 	}
 	/// <summary>
-	/// Кодирование заголовка из сообщения
+	/// РљРѕРґРёСЂРѕРІР°РЅРёРµ Р·Р°РіРѕР»РѕРІРєР° РёР· СЃРѕРѕР±С‰РµРЅРёСЏ
 	/// </summary>
 	void encode_header()
 	{
