@@ -201,6 +201,13 @@ void session::decode_body()
 						char sh[] = "h x y";
 						sh[2] = '0' + x;
 						sh[4] = '0' + y;
+
+						if (my_field->check_kill(x, y))
+						{
+							my_field->kill(x, y);
+							sh[0] = 'k';
+						}
+
 						set_msg(sh); // попадание
 
 						if (game_finished(my_field))

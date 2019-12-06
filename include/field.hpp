@@ -33,8 +33,89 @@ public:
 				j = 0;
 	}
 
+	bool check_bound(int x, int y)
+	{
+		return (x >= 0 && x <= 9 && y >= 0 && y <= 9);
+	};
+
+	bool check_kill(int x, int y)
+	{
+		// find ship start
+		for (int i = 1; i <= 4; ++i)
+		{
+			if (m_field[x - 1][y] & cell::ship)
+				--x;
+			if (m_field[x][y - 1] & cell::ship)
+				--y;
+		}
+
+		//check kill
+		for (int i = 1; i <= 4; ++i)
+		{
+			if (m_field[x][y] & cell::ship)
+			{
+				if (!(m_field[x][y] & cell::shot))
+					return false;
+
+				if (m_field[x + 1][y] & cell::ship)
+					++x;
+				if (m_field[x][y + 1] & cell::ship)
+					++y;
+			}
+			else
+				return true;
+		}
+	}
+
+	void kill(int x, int y)
+	{
+		// find ship start
+		for (int i = 1; i <= 4; ++i)
+		{
+			if (m_field[x - 1][y] & cell::ship)
+				--x;
+			if (m_field[x][y - 1] & cell::ship)
+				--y;
+		}
+
+		for (int i = 1; i <= 4; ++i)
+		{
+			if (m_field[x][y] & cell::ship)
+			{
+				if (check_bound(x - 1, y - 1))
+					m_field[x - 1][y - 1] |= cell::shot;
+				if (check_bound(x - 0, y - 1))
+					m_field[x - 0][y - 1] |= cell::shot;
+				if (check_bound(x + 1, y - 1))
+					m_field[x + 1][y - 1] |= cell::shot;
+
+				if (check_bound(x - 1, y - 0))
+					m_field[x - 1][y - 0] |= cell::shot;
+				if (check_bound(x + 1, y - 0))
+					m_field[x + 1][y - 0] |= cell::shot;
+
+				if (check_bound(x - 1, y + 1))
+					m_field[x - 1][y + 1] |= cell::shot;
+				if (check_bound(x - 0, y + 1))
+					m_field[x - 0][y + 1] |= cell::shot;
+				if (check_bound(x + 1, y + 1))
+					m_field[x + 1][y + 1] |= cell::shot;
+
+				if (m_field[x + 1][y] & cell::ship)
+					++x;
+				if (m_field[x][y + 1] & cell::ship)
+					++y;
+			}
+			else
+				return;
+		}
+	}
+
 	bool ships_ready()
 	{
+#ifdef NDEBUG
+		return true;
+#endif
 		return (m_1 == 4 && m_2 == 3 && m_3 == 2 && m_4 == 1);
 	}
 
@@ -43,10 +124,7 @@ public:
 		if ((direction != 'h') && (direction != 'v'))
 			return false;
 
-		auto check_bound = [](int x, int y)
-		{
-			return (x >= 0 && x <= 9 && y >= 0 && y <= 9);
-		};
+
 
 		if ((length < 1 || length > 4) ||
 			(direction == 'v' && y + length - 1 > 9) ||

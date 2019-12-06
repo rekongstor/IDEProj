@@ -106,6 +106,13 @@ void client::decode_message()
 			m_gui.draw();
 			receive = false; // продолжаем стрелять
 		}
+		if (msg[0] == 'k')
+		{
+			m_en.set_cell(msg[2] - '0', msg[4] - '0', cell::ship | cell::shot);
+			m_en.kill(msg[2] - '0', msg[4] - '0');
+			m_gui.draw();
+			receive = false; // продолжаем стрелять
+		}
 		if (msg[0] == 'm')
 		{
 			m_en.set_cell(msg[2] - '0', msg[4] - '0', cell::shot);
@@ -136,6 +143,13 @@ void client::decode_message()
 		if (msg[0] == 'h') 
 		{
 			m_my.set_cell(msg[2] - '0', msg[4] - '0', cell::ship | cell::shot);
+			m_gui.draw();
+			receive = false; // продолжаем стрелять
+		}
+		if (msg[0] == 'k')
+		{
+			m_my.set_cell(msg[2] - '0', msg[4] - '0', cell::ship | cell::shot);
+			m_my.kill(msg[2] - '0', msg[4] - '0');
 			m_gui.draw();
 			receive = false; // продолжаем стрелять
 		}
