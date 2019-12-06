@@ -123,6 +123,7 @@ void client::decode_message()
 		if (msg[0] == 'g') // не должно происходить
 		{
 			m_en.set_cell(msg[2] - '0', msg[4] - '0', cell::ship | cell::shot);
+			m_en.kill(msg[2] - '0', msg[4] - '0');
 			m_gui.set_state(client_gui_console::egs::end);
 			m_gui.draw();
 			cout << "\x1B[92mYou won!\x1B[0m" << endl;
@@ -169,6 +170,7 @@ void client::decode_message()
 		if (msg[0] == 'g') 
 		{
 			m_my.set_cell(msg[2] - '0', msg[4] - '0', cell::ship | cell::shot);
+			m_my.kill(msg[2] - '0', msg[4] - '0');
 			m_gui.set_state(client_gui_console::egs::end);
 			m_gui.draw();
 			cout << "\x1B[91mYou lost!\x1B[0m" << endl;
