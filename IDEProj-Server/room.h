@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "participant.h"
 #include <boost/shared_ptr.hpp>

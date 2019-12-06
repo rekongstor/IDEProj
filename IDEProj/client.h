@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <cstdlib>
 #include <deque>
@@ -18,16 +18,48 @@ typedef std::deque<message> message_queue;
 class client
 {
 public:
+	/// <summary>
+	/// Конструктор создания классов.
+	/// </summary>
+	/// <param name="io_service">Ссылка на созданный io_service</param>
+	/// <param name="endpoint_iterator">Ссылка на endpoint_iterator</param>
 	client(boost::asio::io_service& io_service, tcp::resolver::iterator endpoint_iterator);
+	/// <summary>
+	/// Метод для отправки сообщения
+	/// </summary>
+	/// <param name="msg">Ссылка на сообщение</param>
 	void write(const message& msg);
+	/// <summary>
+	/// Метод, вызываемый перед закрытием подключения
+	/// </summary>
 	void close();
-
+	/// <summary>
+	/// Объект интерфейса
+	/// </summary>
 	client_gui_console m_gui;
+	/// <summary>
+	/// Переменная состояний игры
+	/// </summary>
 	client_gui_console::egs state;
+	/// <summary>
+	/// Готовность к приёму сообщений
+	/// </summary>
 	bool receive;
+	/// <summary>
+	/// Переменная, отвечающая за готовность расстановки кораблей
+	/// </summary>
 	bool ready;
+	/// <summary>
+	/// Переменная, отвечающая за порядок ходов: true - игрок ходит вторым, false - игрок ходит первым
+	/// </summary>
 	bool second_turn;
+	/// <summary>
+	/// Игровое поле игрока
+	/// </summary>
 	field m_my;
+	/// <summary>
+	/// Игрокове поле соперника
+	/// </summary>
 	field m_en;
 private:
 

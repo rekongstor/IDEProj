@@ -1,4 +1,4 @@
-#include "game.h"
+﻿#include "game.h"
 
 game::game() : m_participant_1(nullptr), m_participant_2(nullptr), m_game_state(egs::preparation)
 {

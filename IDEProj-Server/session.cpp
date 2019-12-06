@@ -1,4 +1,4 @@
-#include "session.h"
+п»ї#include "session.h"
 
 #include <boost/bind.hpp>
 #include <iostream>
@@ -73,7 +73,7 @@ void session::decode_body()
 	{
 		for (int x = 0; x < 10; ++x)
 			for (int y = 0; y < 10; ++y)
-				if ((f->get_cell(x, y) & cell::ship) && !(f->get_cell(x, y) & cell::shot)) // есть неподстрелянный корабль
+				if ((f->get_cell(x, y) & cell::ship) && !(f->get_cell(x, y) & cell::shot)) // РµСЃС‚СЊ РЅРµРїРѕРґСЃС‚СЂРµР»СЏРЅРЅС‹Р№ РєРѕСЂР°Р±Р»СЊ
 					return false;
 		return true;
 	};
@@ -86,8 +86,8 @@ void session::decode_body()
 			m_room.m_game.set_state(game::egs::turn_1);
 	};
 
-	m_read_msg.body()[m_read_msg.body_length()] = 0; // тут нужно слегка отсечь ненужный кусок сообщения
-	string msg = m_read_msg.body(); // теперь обрабатываем сообщение через эту тему, а отправляемое оставляем в m_read_msg.body()
+	m_read_msg.body()[m_read_msg.body_length()] = 0; // С‚СѓС‚ РЅСѓР¶РЅРѕ СЃР»РµРіРєР° РѕС‚СЃРµС‡СЊ РЅРµРЅСѓР¶РЅС‹Р№ РєСѓСЃРѕРє СЃРѕРѕР±С‰РµРЅРёСЏ
+	string msg = m_read_msg.body(); // С‚РµРїРµСЂСЊ РѕР±СЂР°Р±Р°С‚С‹РІР°РµРј СЃРѕРѕР±С‰РµРЅРёРµ С‡РµСЂРµР· СЌС‚Сѓ С‚РµРјСѓ, Р° РѕС‚РїСЂР°РІР»СЏРµРјРѕРµ РѕСЃС‚Р°РІР»СЏРµРј РІ m_read_msg.body()
 	cout << this << ": " << msg << endl;
 
 	if (m_room.m_game.get_state() == game::egs::preparation)
@@ -190,7 +190,7 @@ void session::decode_body()
 					if (c & cell::shot)
 					{
 						cout << "Turn repeat - failed " << msg << endl;
-						set_msg("f"); // выстрел туда же?
+						set_msg("f"); // РІС‹СЃС‚СЂРµР» С‚СѓРґР° Р¶Рµ?
 						deliver(m_read_msg);
 						return;
 					}
@@ -208,7 +208,7 @@ void session::decode_body()
 							sh[0] = 'k';
 						}
 
-						set_msg(sh); // попадание
+						set_msg(sh); // РїРѕРїР°РґР°РЅРёРµ
 
 						if (game_finished(my_field))
 						{
@@ -216,7 +216,7 @@ void session::decode_body()
 							char sh[] = "g x y";
 							sh[2] = '0' + x;
 							sh[4] = '0' + y;
-							set_msg(sh); // победа
+							set_msg(sh); // РїРѕР±РµРґР°
 							m_room.deliver(m_read_msg);
 							m_room.m_game.set_state(game::egs::end);
 							return;
@@ -231,7 +231,7 @@ void session::decode_body()
 						char sh[] = "m x y";
 						sh[2] = '0' + x;
 						sh[4] = '0' + y;
-						set_msg(sh); // попадание
+						set_msg(sh); // РїРѕРїР°РґР°РЅРёРµ
 						swap_state();
 						m_room.deliver(m_read_msg);
 						return;
@@ -241,7 +241,7 @@ void session::decode_body()
 		else
 		{
 			cout << "Turn order - failed " << msg << endl;
-			set_msg("f"); // ход не в своё время
+			set_msg("f"); // С…РѕРґ РЅРµ РІ СЃРІРѕС‘ РІСЂРµРјСЏ
 			deliver(m_read_msg);
 			return;
 		}
@@ -255,7 +255,7 @@ void session::decode_body()
 	{
 		for (auto& p : m_room.m_participants)
 			if (p.get() != this)
-				p->deliver(m_read_msg); // отправим сообщение противнику
+				p->deliver(m_read_msg); // РѕС‚РїСЂР°РІРёРј СЃРѕРѕР±С‰РµРЅРёРµ РїСЂРѕС‚РёРІРЅРёРєСѓ
 
 		return;
 	}

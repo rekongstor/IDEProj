@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "field.hpp"
 
 class client_gui_console
