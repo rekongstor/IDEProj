@@ -21,3 +21,6 @@ Header files are commented in Doxygen style. You can generate a documentation us
 3) В любом из проектов восстановить boost пакеты (через Manage NuGet Packages)
 4) Установить расширение "1-Click Docs" через контекстное меню Расширения
 5) [для генерации документации] Назначить пути до Doxygen в Параметрах (предварительно установить Doxygen с официального сайта http://www.doxygen.nl/download.html)
+
+## Preview
+![Destructoid on CPP](https://github.com/rekongstor/IDEProj/blob/master/preview.png)
