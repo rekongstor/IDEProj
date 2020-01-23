@@ -5,9 +5,14 @@
 Проект для лабораторной работы по дисциплине Инструментальные средства разработки программного обеспечения.
 Это игра "Морской бой", работающая по локальной сети.
 Цель заключалась в применении навыков работы с github с gitflow, CI/CD в виде Jenkins и небольшом предварительном проектировании с помощью UML диаграмм.
+* Gitflow
+* Jenkins CI/CD
+* Boost
+* TCP/IP
+* UML
 
 ## Code Style
-Header files are commented in Doxygen style. You can generate a documentation using Doxygen software (http://www.doxygen.nl/).
+Заголовочные файлы содержат в себе комментарии для генерации Doxygen файлов (http://www.doxygen.nl/).
 
 ## Install
 1) Установить/Изменить Microsoft Visual Studio 2019, добавив следующие расришения: 
