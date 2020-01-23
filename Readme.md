@@ -4,6 +4,7 @@
 ## General
 Проект для лабораторной работы по дисциплине Инструментальные средства разработки программного обеспечения.
 Это игра "Морской бой", работающая по локальной сети.
+Цель заключалась в применении навыков работы с github с gitflow, CI/CD в виде Jenkins и небольшом предварительном проектировании с помощью UML диаграмм.
 
 ## Code Style
 Header files are commented in Doxygen style. You can generate a documentation using Doxygen software (http://www.doxygen.nl/).
@@ -23,4 +24,4 @@ Header files are commented in Doxygen style. You can generate a documentation us
 5) [для генерации документации] Назначить пути до Doxygen в Параметрах (предварительно установить Doxygen с официального сайта http://www.doxygen.nl/download.html)
 
 ## Preview
-![Destructoid on CPP](https://github.com/rekongstor/IDEProj/blob/master/preview.png)
+![Seafight](https://github.com/rekongstor/IDEProj/blob/master/preview.png)
