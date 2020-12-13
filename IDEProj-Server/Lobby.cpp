@@ -25,6 +25,11 @@ bool Lobby::RemoveParticipant(participant* ptr)
    return false;
 }
 
+participant* Lobby::GetEnemy(participant* ptr)
+{
+   return m_participant_1 == ptr ? m_participant_2 : m_participant_1;
+}
+
 bool Lobby::AddParticipant(participant* ptr)
 {
    if (!m_participant_1)

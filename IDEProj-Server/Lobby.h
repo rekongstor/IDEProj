@@ -15,5 +15,7 @@ public:
 
 	bool AddParticipant(participant* ptr); // Returns true if succeed
 	bool RemoveParticipant(participant* ptr); // Returns true if lobby is non-empty
+
+	participant* GetEnemy(participant* ptr);
 };
 

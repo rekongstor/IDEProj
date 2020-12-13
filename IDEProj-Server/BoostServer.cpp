@@ -40,13 +40,23 @@ void BoostServer::WriteMsg(const message& msg, participant* participant)
    participant->deliver(msg);
 }
 
-void BoostServer::WriteLobby(const message& msg, Lobby* lobby)
+void BoostServer::WriteLobby(const message& msg, participant* participant)
 {
 	std::string tmpMsg(msg.body(), msg.body_length());
 	OutputDebugString("Server delivers message to lobby: ");
 	OutputDebugString(tmpMsg.c_str());
 	OutputDebugString("\n");
 
-   lobby->m_participant_1->deliver(msg);
-   lobby->m_participant_2->deliver(msg);
+   clentData[participant].lobby->m_participant_1->deliver(msg);
+	clentData[participant].lobby->m_participant_2->deliver(msg);
+}
+
+void BoostServer::WriteEnemy(const message& msg, participant* participant)
+{
+	std::string tmpMsg(msg.body(), msg.body_length());
+	OutputDebugString("Server delivers message to enemy: ");
+	OutputDebugString(tmpMsg.c_str());
+	OutputDebugString("\n");
+
+	clentData[participant].lobby->GetEnemy(participant)->deliver(msg);
 }

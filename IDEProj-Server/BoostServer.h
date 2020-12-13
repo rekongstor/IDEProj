@@ -27,7 +27,8 @@ public:
 	void handle_accept(session_ptr session, const boost::system::error_code& error);
 	
 	void WriteMsg(const message& msg, participant* participant) override;
-	void WriteLobby(const message& msg, Lobby* lobby) override;
+	void WriteLobby(const message& msg, participant* participant) override;
+	void WriteEnemy(const message& msg, participant* participant) override;
 private:
 	boost::asio::io_service& m_io_service;
 	tcp::acceptor m_acceptor;
