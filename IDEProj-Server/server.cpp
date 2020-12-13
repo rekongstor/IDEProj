@@ -23,9 +23,12 @@ void Server::HandleMessage(const std::string& msg, participant* sender)
 void Server::HandleMessageConnected(const std::string& msg, participant* sender)
 {
 	// TODO: This should be implemented properly
-	clentData[sender].state = ClientState::session;
-	TEMPORARY.AddParticipant(sender);
-	HandleMessageSession(msg, sender);
+	if (TEMPORARY.AddParticipant(sender)) {
+		SharedClient& client = clentData[sender];
+		client.state = ClientState::session;
+		client.lobby = &TEMPORARY;
+		HandleMessageSession(msg, sender);
+	}
 }
 
 void Server::HandleMessageLobby(const std::string& msg, participant* sender)
@@ -34,7 +37,7 @@ void Server::HandleMessageLobby(const std::string& msg, participant* sender)
 
 void Server::HandleMessageSession(const std::string& msg, participant* sender)
 {
-   	auto set_msg = [&](const char* line)
+	auto set_msg = [&](const char* line)
 	{
 		sendMsg.body_length(strlen(line));
 		memcpy(sendMsg.body(), line, sendMsg.body_length());
@@ -106,7 +109,7 @@ void Server::HandleMessageSession(const std::string& msg, participant* sender)
 						TEMPORARY.m_game.set_state(Game::egs::turn_2);
 					else
 						TEMPORARY.m_game.set_state(Game::egs::turn_1);
-					WriteLobby(sendMsg, &TEMPORARY);
+					WriteLobby(sendMsg, sender);
 
 					for (int y = 0; y < 10; ++y) {
 						for (int x = 0; x < 10; ++x)
@@ -173,12 +176,12 @@ void Server::HandleMessageSession(const std::string& msg, participant* sender)
 							sh[2] = '0' + x;
 							sh[4] = '0' + y;
 							set_msg(sh); // победа
-							WriteLobby(sendMsg, &TEMPORARY);
+							WriteLobby(sendMsg, sender);
 							TEMPORARY.m_game.set_state(Game::egs::end);
 							return;
 						}
 
-						WriteLobby(sendMsg, &TEMPORARY);
+						WriteLobby(sendMsg, sender);
 						return;
 					} else {
 						cout << "Miss " << msg << endl;
@@ -187,7 +190,7 @@ void Server::HandleMessageSession(const std::string& msg, participant* sender)
 						sh[4] = '0' + y;
 						set_msg(sh); // попадание
 						swap_state();
-						WriteLobby(sendMsg, &TEMPORARY);
+						WriteLobby(sendMsg, sender);
 						return;
 					}
 				}
@@ -199,13 +202,12 @@ void Server::HandleMessageSession(const std::string& msg, participant* sender)
 		}
 
 
-		WriteLobby(sendMsg, &TEMPORARY);
+		WriteLobby(sendMsg, sender);
 		return;
 	}
 	if (TEMPORARY.m_game.get_state() == Game::egs::end) {
 		set_msg("!"); // сейчас сообщения о том, кто победитель, никак не обрабатывается
-		participant* enemy = (TEMPORARY.IsParticipant1(sender) ? TEMPORARY.m_participant_2 : TEMPORARY.m_participant_1);
-		WriteMsg(sendMsg, enemy); // отправим сообщение противнику
+		WriteEnemy(sendMsg, sender);
 		return;
 	}
 	set_msg("f"); // это сообщение об ошибке, да?
