@@ -15,8 +15,10 @@
 #include <boost/asio.hpp>
 #include <boost/thread/thread.hpp>
 
+
+#include "BoostClient.h"
 #include "message.hpp"
-#include "client.h"
+#include "ConsoleGui.h"
 
 using boost::asio::ip::tcp;
 
@@ -39,18 +41,17 @@ int main(int argc, char* argv[])
 		tcp::resolver::query query(argv[1], argv[2]);
 		tcp::resolver::iterator iterator = resolver.resolve(query);
 
-		client c(io_service, iterator);
-
+		BoostClient client(io_service, iterator);
+		ConsoleGui gui(&client);
 		
-
 		boost::thread t(boost::bind(&boost::asio::io_service::run, &io_service));
 
 		char line[message::max_body_length + 1];
-		c.m_gui.draw();
+		gui.draw();
 		while (std::cin.getline(line, message::max_body_length + 1))
 		{
 			// we want to check our input if we are't waiting for server message
-			if (!c.receive)
+			if (!client.receive)
 			{
 				using namespace std; // For strlen and memcpy.
 				message msg;
@@ -58,67 +59,67 @@ int main(int argc, char* argv[])
 				memcpy(msg.body(), line, msg.body_length());
 				msg.encode_header();
 
-				if (c.m_gui.get_state() == client_gui_console::egs::preparation)
+				if (client.gameState == egs::preparation)
 				{
 					if ((strlen(line) == 9 && line[0] == 's' && line[2] >= '0' &&
 						line[2] <= '9' && line[4] >= '0' && line[4] <= '9' &&
 						line[6] >= '1' && line[6] <= '4') && (line[8] == 'v' || line[8] == 'h'))
 					{
-						if (!c.m_my.set_ship(line[2] - '0', line[4] - '0', line[6] - '0', line[8]))
+						if (!client.m_my.set_ship(line[2] - '0', line[4] - '0', line[6] - '0', line[8]))
 						{
-							c.m_gui.draw();
+							gui.draw();
 							cout << "\x1B[31mInvalid placement!\x1B[0m" << endl;
 							continue;
 						}
 						// we want to check here our placement
-						c.write(msg);
-						c.receive = true;
+						client.write(msg);
+						client.receive = true;
 						continue;
 					} // s x y w d command
 
 					if (strlen(line) == 1 && line[0] == 'r')
 					{
-						if (c.m_my.ships_ready())
+						if (client.m_my.ships_ready())
 						{
-							c.ready = true;
-							c.write(msg);
-							c.receive = true;
+							client.ready = true;
+							client.write(msg);
+							client.receive = true;
 							continue;
 						}
 						else
 						{
-							c.m_gui.draw();
+							gui.draw();
 							cout << "\x1B[31mShips not ready!\x1B[0m" << endl;
 							continue;
 						}
 					}
-					c.m_gui.draw();
+					gui.draw();
 					cout << "\x1B[31mInvalid input!\x1B[0m" << endl;
 					// otherwise we don't send anything
 				}
 
 				// turns
-				if (c.m_gui.get_state() == client_gui_console::egs::my_turn)
+				if (client.gameState == egs::my_turn)
 				{
 					if (strlen(line) == 3 && line[0] >= '0' && line[0] <= '9' &&
 						line[2] >= '0' && line[2] <= '9')
 					{
-						c.write(msg);
-						c.receive = true;
+						client.write(msg);
+						client.receive = true;
 						continue;
 					}
 					// otherwise we don't send anything
 				}
 
-				if (c.m_gui.get_state() == client_gui_console::egs::end)
+				if (client.gameState == egs::end)
 				{
-					c.write(msg);
+					client.write(msg);
 					continue;
 				}
 			}
 		}
 
-		c.close();
+		client.close();
 		t.join();
 	}
 	catch (std::exception & e)

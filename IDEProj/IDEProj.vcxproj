@@ -137,13 +137,15 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="client.cpp" />
-    <ClCompile Include="client_gui_console.cpp" />
+    <ClCompile Include="BoostClient.cpp" />
+    <ClCompile Include="Client.cpp" />
+    <ClCompile Include="ConsoleGui.cpp" />
     <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="client.h" />
-    <ClInclude Include="client_gui_console.h" />
+    <ClInclude Include="BoostClient.h" />
+    <ClInclude Include="Client.h" />
+    <ClInclude Include="ConsoleGui.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
