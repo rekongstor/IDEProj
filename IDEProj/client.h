@@ -19,7 +19,7 @@ class Client
 {
 public:  
 	egs gameState;
-	ClientState state;
+	ClientState state = ClientState::session;
 	ConsoleGui* gui;
 	
 	/// Переменная, отвечающая за готовность расстановки кораблей

@@ -15,6 +15,11 @@ BoostClient::BoostClient(boost::asio::io_service& io_service,
 
 void BoostClient::write(const message& msg)
 {
+	std::string dbgMsg(msg.body(), msg.body_length());
+	OutputDebugString("Client delivers message: ");
+	OutputDebugString(dbgMsg.c_str());
+	OutputDebugString("\n");
+
 	m_io_service_.post(boost::bind(&BoostClient::do_write, this, msg));
 }
 
@@ -54,6 +59,10 @@ void BoostClient::decode_message()
 	using namespace std;
 	
 	string msg = m_read_msg.body();
+
+	OutputDebugString("Client receives message: ");
+	OutputDebugString(msg.c_str());
+	OutputDebugString("\n");
 
 	HandleMessage(msg);
 }

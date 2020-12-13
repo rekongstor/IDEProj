@@ -1,30 +1,214 @@
-пїњ#include "server.h"
+#include "Server.h"
 
-#include <boost/bind.hpp>
+#include <iostream>
+using namespace std;
 
-using boost::asio::ip::tcp;
 
-server::server(boost::asio::io_service& io_service, const tcp::endpoint& endpoint)
-	: m_io_service(io_service), m_acceptor(io_service, endpoint)
+void Server::HandleMessage(const std::string& msg, participant* sender)
 {
-	start_accept();
+   switch (clentData[sender].state)
+   {
+   case ClientState::connected:
+		HandleMessageConnected(msg, sender);
+      break;
+   case ClientState::lobby:
+		HandleMessageLobby(msg, sender);
+      break;
+   case ClientState::session:
+		HandleMessageSession(msg, sender);
+      break;
+   }
 }
 
-void server::start_accept()
+void Server::HandleMessageConnected(const std::string& msg, participant* sender)
 {
-	session_ptr new_session(new session(m_io_service, m_room));
-	m_acceptor.async_accept(new_session->socket(),
-		boost::bind(&server::handle_accept, this, new_session,
-			boost::asio::placeholders::error));
+	// TODO: This should be implemented properly
+	clentData[sender].state = ClientState::session;
+	TEMPORARY.AddParticipant(sender);
+	HandleMessageSession(msg, sender);
 }
 
-void server::handle_accept(session_ptr session,
-	const boost::system::error_code& error)
+void Server::HandleMessageLobby(const std::string& msg, participant* sender)
 {
-	if (!error)
+}
+
+void Server::HandleMessageSession(const std::string& msg, participant* sender)
+{
+   	auto set_msg = [&](const char* line)
 	{
-		session->start();
-	}
+		sendMsg.body_length(strlen(line));
+		memcpy(sendMsg.body(), line, sendMsg.body_length());
+		sendMsg.encode_header();
+	};
 
-	start_accept();
+	auto game_finished = [&](field* f)
+	{
+		for (int x = 0; x < 10; ++x)
+			for (int y = 0; y < 10; ++y)
+				if ((f->get_cell(x, y) & cell::ship) && !(f->get_cell(x, y) & cell::shot)) // есть неподстреленный корабль
+					return false;
+		return true;
+	};
+
+	auto swap_state = [&]()
+	{
+		if (TEMPORARY.IsParticipant1(sender))
+			TEMPORARY.m_game.set_state(Game::egs::turn_2);
+		else
+			TEMPORARY.m_game.set_state(Game::egs::turn_1);
+	};
+
+
+
+	if (TEMPORARY.m_game.get_state() == Game::egs::preparation) {
+		std::cout << "Preparation " << msg.size() << endl;
+		if (msg.size() == 9)
+			if (msg[0] == 's' && \
+				msg[1] == ' ' && \
+				msg[2] >= '0' && msg[2] <= '9' && \
+				msg[3] == ' ' && \
+				msg[4] >= '0' && msg[4] <= '9' && \
+				msg[5] == ' ' && \
+				msg[6] >= '1' && msg[6] <= '4' && \
+				msg[7] == ' ' && \
+				(msg[8] == 'v' || msg[8] == 'h')) {
+				field* my_field;
+				if (TEMPORARY.IsParticipant1(sender))
+					my_field = &TEMPORARY.m_game.m_field_1;
+				else
+					my_field = &TEMPORARY.m_game.m_field_2;
+
+				if (!my_field->set_ship(msg[2] - '0', msg[4] - '0', msg[6] - '0', msg[8])) {
+					set_msg("f");
+					cout << "Placement error" << endl;
+					WriteMsg(sendMsg, sender);
+					return;
+				}
+
+				set_msg("d");
+				WriteMsg(sendMsg, sender);
+				return;
+			}
+		if (msg.size() == 1)
+			if (msg[0] == 'r') {
+				if (TEMPORARY.IsParticipant1(sender))
+					TEMPORARY.m_game.m_p1_ready = true;
+
+				if (TEMPORARY.IsParticipant2(sender))
+					TEMPORARY.m_game.m_p2_ready = true;
+
+				if (TEMPORARY.m_game.m_p1_ready && TEMPORARY.m_game.m_p2_ready) {
+					set_msg("t");
+					WriteMsg(sendMsg, sender);
+					set_msg("d");
+
+					if (TEMPORARY.IsParticipant1(sender))
+						TEMPORARY.m_game.set_state(Game::egs::turn_2);
+					else
+						TEMPORARY.m_game.set_state(Game::egs::turn_1);
+					WriteLobby(sendMsg, &TEMPORARY);
+
+					for (int y = 0; y < 10; ++y) {
+						for (int x = 0; x < 10; ++x)
+							cout << TEMPORARY.m_game.m_field_1.get_cell(x, y) << ' ';
+						cout << endl;
+					}
+					cout << endl;
+
+					for (int y = 0; y < 10; ++y) {
+						for (int x = 0; x < 10; ++x)
+							cout << TEMPORARY.m_game.m_field_2.get_cell(x, y) << ' ';
+						cout << endl;
+					}
+					cout << endl;
+
+					return;
+				}
+				return;
+			}
+	}
+	if (TEMPORARY.m_game.get_state() == Game::egs::turn_1 || TEMPORARY.m_game.get_state() == Game::egs::turn_2) {
+		cout << "Turns " << msg.size() << endl;
+		if ((TEMPORARY.m_game.get_state() == Game::egs::turn_1 && TEMPORARY.IsParticipant1(sender)) || \
+			(TEMPORARY.m_game.get_state() == Game::egs::turn_2 && TEMPORARY.IsParticipant2(sender))) {
+			if (msg.size() == 3)
+				if (msg[0] >= '0' && msg[0] <= '9' && \
+					msg[1] == ' ' && \
+					msg[2] >= '0' && msg[2] <= '9') {
+					field* my_field;
+					if (TEMPORARY.IsParticipant1(sender))
+						my_field = &TEMPORARY.m_game.m_field_2;
+					else
+						my_field = &TEMPORARY.m_game.m_field_1;
+
+					int x = msg[0] - '0';
+					int y = msg[2] - '0';
+					int c = my_field->get_cell(x, y);
+					my_field->set_cell(x, y, c | cell::shot);
+
+
+					if (c & cell::shot) {
+						cout << "Turn repeat - failed " << msg << endl;
+						set_msg("f"); // выстрел туда же?
+						WriteMsg(sendMsg, sender);
+						return;
+					}
+
+					if (c & cell::ship) {
+						cout << "Hit! " << msg << endl;
+						char sh[] = "h x y";
+						sh[2] = '0' + x;
+						sh[4] = '0' + y;
+
+						if (my_field->check_kill(x, y)) {
+							my_field->kill(x, y);
+							sh[0] = 'k';
+						}
+
+						set_msg(sh); // попадание
+
+						if (game_finished(my_field)) {
+							cout << "GG " << msg << endl;
+							char sh[] = "g x y";
+							sh[2] = '0' + x;
+							sh[4] = '0' + y;
+							set_msg(sh); // победа
+							WriteLobby(sendMsg, &TEMPORARY);
+							TEMPORARY.m_game.set_state(Game::egs::end);
+							return;
+						}
+
+						WriteLobby(sendMsg, &TEMPORARY);
+						return;
+					} else {
+						cout << "Miss " << msg << endl;
+						char sh[] = "m x y";
+						sh[2] = '0' + x;
+						sh[4] = '0' + y;
+						set_msg(sh); // попадание
+						swap_state();
+						WriteLobby(sendMsg, &TEMPORARY);
+						return;
+					}
+				}
+		} else {
+			cout << "Turn order - failed " << msg << endl;
+			set_msg("f"); // ход не в своЄ врем€
+			WriteMsg(sendMsg, sender);
+			return;
+		}
+
+
+		WriteLobby(sendMsg, &TEMPORARY);
+		return;
+	}
+	if (TEMPORARY.m_game.get_state() == Game::egs::end) {
+		set_msg("!"); // сейчас сообщени€ о том, кто победитель, никак не обрабатываетс€
+		participant* enemy = (TEMPORARY.IsParticipant1(sender) ? TEMPORARY.m_participant_2 : TEMPORARY.m_participant_1);
+		WriteMsg(sendMsg, enemy); // отправим сообщение противнику
+		return;
+	}
+	set_msg("f"); // это сообщение об ошибке, да?
+	WriteMsg(sendMsg, sender);
+	cout << this << ": " << msg << endl;
 }

@@ -1,9 +1,11 @@
 ﻿#pragma once
 #include "participant.h"
-#include "room.h"
+#include "BoostRoom.h"
 #include <deque>
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/asio.hpp>
+
+#include "Server.h"
 
 typedef std::deque<message> message_queue;
 
@@ -11,7 +13,7 @@ using boost::asio::ip::tcp;
 /// <summary>
 /// Класс сервер-сессии клиента
 /// </summary>
-class session : public participant,	public boost::enable_shared_from_this<session>
+class BoostSession : public participant,	public boost::enable_shared_from_this<BoostSession>
 {
 public:
 	/// <summary>
@@ -19,7 +21,7 @@ public:
 	/// </summary>
 	/// <param name="io_service">Ссылка на io_service</param>
 	/// <param name="room">Ссылка на подключаемую комнату</param>
-	session(boost::asio::io_service& io_service, room& room);
+	BoostSession(boost::asio::io_service& io_service, BoostRoom& room);
 	/// <summary>
 	/// Функция, возвращающая текущий сокет
 	/// </summary>
@@ -33,7 +35,7 @@ public:
 	/// Метод отправки сообщений клиенту
 	/// </summary>
 	/// <param name="msg"></param>
-	void deliver(const message& msg);
+	void deliver(const message& msg) override;
 	/// <summary>
 	/// Асинхронное чтение заголовка сообщения
 	/// </summary>
@@ -50,6 +52,10 @@ public:
 	/// <param name="error"></param>
 	void handle_write(const boost::system::error_code& error);
 
+	// Delivers message to participant
+	void WriteMsg(const message& msg);
+	// Delivers message to all participants in the lobby
+	void WriteLobby(const message& msg, Lobby* lobby);
 private:
 	/// <summary>
 	/// Сокет
@@ -58,7 +64,7 @@ private:
 	/// <summary>
 	/// Ссылка на комнату сессии
 	/// </summary>
-	room& m_room;
+	BoostRoom& m_room;
 	/// <summary>
 	/// Сообщение сессии
 	/// </summary>

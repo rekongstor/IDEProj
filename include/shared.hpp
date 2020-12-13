@@ -10,5 +10,5 @@ enum class ClientState
 
 struct SharedClient
 {
-	ClientState state;
+	ClientState state = ClientState::connected;
 };

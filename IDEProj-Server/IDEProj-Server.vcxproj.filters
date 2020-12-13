@@ -13,6 +13,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Файлы заголовков\Net">
+      <UniqueIdentifier>{25d7f242-219e-4931-afff-51564a68c22c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Исходные файлы\Net">
+      <UniqueIdentifier>{4ba3a3c2-9a05-40ae-81cd-5d1ccbbd780e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -21,33 +27,45 @@
     <ClCompile Include="Main.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="game.cpp">
+    <ClCompile Include="BoostRoom.cpp">
+      <Filter>Исходные файлы\Net</Filter>
+    </ClCompile>
+    <ClCompile Include="BoostServer.cpp">
+      <Filter>Исходные файлы\Net</Filter>
+    </ClCompile>
+    <ClCompile Include="BoostSession.cpp">
+      <Filter>Исходные файлы\Net</Filter>
+    </ClCompile>
+    <ClCompile Include="Game.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="room.cpp">
+    <ClCompile Include="Server.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="server.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
-    <ClCompile Include="session.cpp">
+    <ClCompile Include="Lobby.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="game.h">
+    <ClInclude Include="Game.h">
       <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="BoostRoom.h">
+      <Filter>Файлы заголовков\Net</Filter>
+    </ClInclude>
+    <ClInclude Include="BoostServer.h">
+      <Filter>Файлы заголовков\Net</Filter>
+    </ClInclude>
+    <ClInclude Include="BoostSession.h">
+      <Filter>Файлы заголовков\Net</Filter>
     </ClInclude>
     <ClInclude Include="participant.h">
+      <Filter>Файлы заголовков\Net</Filter>
+    </ClInclude>
+    <ClInclude Include="Server.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="room.h">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
-    <ClInclude Include="session.h">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
-    <ClInclude Include="server.h">
+    <ClInclude Include="Lobby.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>

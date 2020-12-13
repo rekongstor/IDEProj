@@ -124,20 +124,24 @@ void Client::HandleMessageSession(const std::string& msg)
 			m_my.set_cell(msg[2] - '0', msg[4] - '0', cell::ship | cell::shot);
 			gui->draw();
 			receive = false; // продолжаем стрелять
+			break;
 		case 'k':
 			m_my.set_cell(msg[2] - '0', msg[4] - '0', cell::ship | cell::shot);
 			m_my.kill(msg[2] - '0', msg[4] - '0');
 			gui->draw();
 			receive = false; // продолжаем стрелять
+			break;
 		case 'm':
 			m_my.set_cell(msg[2] - '0', msg[4] - '0', cell::shot);
 			gameState = egs::my_turn;
 			gui->draw();
 			receive = false; // передаём ход сопернику
+			break;
 		case 'f':
 			gui->draw();
 			cout << "Not your turn";
 			receive = false; // продолжаем стрелять
+			break;
 		case 'g':
 			m_my.set_cell(msg[2] - '0', msg[4] - '0', cell::ship | cell::shot);
 			m_my.kill(msg[2] - '0', msg[4] - '0');
@@ -145,6 +149,7 @@ void Client::HandleMessageSession(const std::string& msg)
 			gui->draw();
 			cout << "\x1B[91mYou lost!\x1B[0m" << endl;
 			receive = false;
+			break;
 		default:
 			throw(std::exception("Wrong message received?"));
 		}

@@ -1,33 +1,28 @@
-﻿#pragma once
-#include "session.h"
-#include <boost/asio.hpp>
+#pragma once
+#include <map>
+#include <set>
+#include <string>
+#include "message.hpp"
+#include "Lobby.h"
+#include "participant.h"
+#include "shared.hpp"
 
-typedef boost::shared_ptr<session> session_ptr;
-/// <summary>
-/// Класс сервера
-/// </summary>
-class server
+class message;
+
+class Server
 {
 public:
-	/// <summary>
-	/// Конструктор класса сервера
-	/// </summary>
-	/// <param name="io_service">Ссылка на io_service</param>
-	/// <param name="endpoint">Ссылка на endpoint</param>
-	server(boost::asio::io_service& io_service, const tcp::endpoint& endpoint);
-	/// <summary>
-	/// Метод начала приёма сообщений
-	/// </summary>
-	void start_accept();
-	/// <summary>
-	/// Асинхронный приём сообщений
-	/// </summary>
-	/// <param name="session">Указатель на сессию для приёма сообщения</param>
-	/// <param name="error">Ссылка на ошибку</param>
-	void handle_accept(session_ptr session, const boost::system::error_code& error);
+	std::set<Lobby> lobbies;
+	std::map<participant*, SharedClient> clentData;
+   message sendMsg;
 
-private:
-	boost::asio::io_service& m_io_service;
-	tcp::acceptor m_acceptor;
-	room m_room;
+	Lobby TEMPORARY;
+
+	virtual void WriteMsg(const message& msg, participant* participant) = 0;
+	virtual void WriteLobby(const message& msg, Lobby* lobby) = 0;
+	void HandleMessage(const std::string& msg, participant* sender);
+	void HandleMessageConnected(const std::string& msg, participant* sender);
+	void HandleMessageLobby(const std::string& msg, participant* sender);
+	void HandleMessageSession(const std::string& msg, participant* sender);
 };
+

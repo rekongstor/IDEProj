@@ -1,12 +1,13 @@
-﻿#include "server.h"
+﻿#include "BoostServer.h"
 
 #include <iostream>
 #include <list>
 
-typedef boost::shared_ptr<server> server_ptr;
+typedef boost::shared_ptr<BoostServer> server_ptr;
 typedef std::list<server_ptr> server_list;
 
 using boost::asio::ip::tcp;
+
 
 int main(int argc, char* argv[])
 {
@@ -25,7 +26,7 @@ int main(int argc, char* argv[])
 		{
 			using namespace std; // For atoi.
 			tcp::endpoint endpoint(tcp::v4(), atoi(argv[i]));
-			server_ptr server(new server(io_service, endpoint));
+			server_ptr server(new BoostServer(io_service, endpoint));
 			servers.push_back(server);
 		}
 

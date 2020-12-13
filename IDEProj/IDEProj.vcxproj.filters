@@ -19,6 +19,12 @@
     <Filter Include="Исходные файлы\Ui">
       <UniqueIdentifier>{a480798b-4ed3-4ae6-8954-dec19a6177bd}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Файлы заголовков\Net">
+      <UniqueIdentifier>{6bf0fd6f-ea5f-4861-965a-6d41177ca62d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Файлы заголовков\Gui">
+      <UniqueIdentifier>{a2eafc0b-83f0-46b3-a239-7bb3974f3440}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -38,14 +44,14 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="BoostClient.h">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
-    <ClInclude Include="ConsoleGui.h">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
     <ClInclude Include="Client.h">
       <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="BoostClient.h">
+      <Filter>Файлы заголовков\Net</Filter>
+    </ClInclude>
+    <ClInclude Include="ConsoleGui.h">
+      <Filter>Файлы заголовков\Gui</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

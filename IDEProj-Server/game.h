@@ -4,7 +4,7 @@
 /// <summary>
 /// Класс с игровой логикой
 /// </summary>
-class game
+class Game
 {
 public:
 	/// <summary>
@@ -20,7 +20,7 @@ public:
 	/// <summary>
 	/// Конструктор по умолчанию
 	/// </summary>
-	game();
+	Game();
 	/// <summary>
 	/// Метод установки состояния
 	/// </summary>
@@ -31,14 +31,6 @@ public:
 	/// </summary>
 	/// <returns></returns>
 	egs get_state();
-	/// <summary>
-	/// Указатель на первого игрока
-	/// </summary>
-	void* m_participant_1;
-	/// <summary>
-	/// Указатель на второго игрока
-	/// </summary>
-	void* m_participant_2;
 	/// <summary>
 	/// Поле первого игрока
 	/// </summary>
