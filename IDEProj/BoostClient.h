@@ -30,7 +30,7 @@ public:
 	/// Метод для отправки сообщения
 	/// </summary>
 	/// <param name="msg">Ссылка на сообщение</param>
-	void write(const message& msg);
+	virtual void write(const message& msg) override;
 	/// <summary>
 	/// Метод, вызываемый перед закрытием подключения
 	/// </summary>

@@ -5,6 +5,8 @@
 #include "field.hpp"
 #include "shared.hpp"
 
+class message;
+
 enum class egs
 {
 	preparation,
@@ -35,5 +37,9 @@ public:
 	void HandleMessageConnected(const std::string& msg);
 	void HandleMessageLobby(const std::string& msg);
 	void HandleMessageSession(const std::string& msg);
+
+	void HandleSendMessage(const std::string& line);
+
+	virtual void write(const message& msg) = 0;
 };
 
