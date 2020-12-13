@@ -37,6 +37,7 @@ void Server::HandleMessageLobby(const std::string& msg, participant* sender)
 
 void Server::HandleMessageSession(const std::string& msg, participant* sender)
 {
+	SharedClient& client = clentData[sender];
 	auto set_msg = [&](const char* line)
 	{
 		sendMsg.body_length(strlen(line));
@@ -55,15 +56,15 @@ void Server::HandleMessageSession(const std::string& msg, participant* sender)
 
 	auto swap_state = [&]()
 	{
-		if (TEMPORARY.IsParticipant1(sender))
-			TEMPORARY.m_game.set_state(Game::egs::turn_2);
+		if (client.lobby->IsParticipant1(sender))
+			client.lobby->m_game.set_state(Game::egs::turn_2);
 		else
-			TEMPORARY.m_game.set_state(Game::egs::turn_1);
+			client.lobby->m_game.set_state(Game::egs::turn_1);
 	};
 
 
 
-	if (TEMPORARY.m_game.get_state() == Game::egs::preparation) {
+	if (client.lobby->m_game.get_state() == Game::egs::preparation) {
 		std::cout << "Preparation " << msg.size() << endl;
 		if (msg.size() == 9)
 			if (msg[0] == 's' && \
@@ -76,10 +77,10 @@ void Server::HandleMessageSession(const std::string& msg, participant* sender)
 				msg[7] == ' ' && \
 				(msg[8] == 'v' || msg[8] == 'h')) {
 				field* my_field;
-				if (TEMPORARY.IsParticipant1(sender))
-					my_field = &TEMPORARY.m_game.m_field_1;
+				if (client.lobby->IsParticipant1(sender))
+					my_field = &client.lobby->m_game.m_field_1;
 				else
-					my_field = &TEMPORARY.m_game.m_field_2;
+					my_field = &client.lobby->m_game.m_field_2;
 
 				if (!my_field->set_ship(msg[2] - '0', msg[4] - '0', msg[6] - '0', msg[8])) {
 					set_msg("f");
@@ -94,33 +95,33 @@ void Server::HandleMessageSession(const std::string& msg, participant* sender)
 			}
 		if (msg.size() == 1)
 			if (msg[0] == 'r') {
-				if (TEMPORARY.IsParticipant1(sender))
-					TEMPORARY.m_game.m_p1_ready = true;
+				if (client.lobby->IsParticipant1(sender))
+					client.lobby->m_game.m_p1_ready = true;
 
-				if (TEMPORARY.IsParticipant2(sender))
-					TEMPORARY.m_game.m_p2_ready = true;
+				if (client.lobby->IsParticipant2(sender))
+					client.lobby->m_game.m_p2_ready = true;
 
-				if (TEMPORARY.m_game.m_p1_ready && TEMPORARY.m_game.m_p2_ready) {
+				if (client.lobby->m_game.m_p1_ready && client.lobby->m_game.m_p2_ready) {
 					set_msg("t");
 					WriteMsg(sendMsg, sender);
 					set_msg("d");
 
-					if (TEMPORARY.IsParticipant1(sender))
-						TEMPORARY.m_game.set_state(Game::egs::turn_2);
+					if (client.lobby->IsParticipant1(sender))
+						client.lobby->m_game.set_state(Game::egs::turn_2);
 					else
-						TEMPORARY.m_game.set_state(Game::egs::turn_1);
+						client.lobby->m_game.set_state(Game::egs::turn_1);
 					WriteLobby(sendMsg, sender);
 
 					for (int y = 0; y < 10; ++y) {
 						for (int x = 0; x < 10; ++x)
-							cout << TEMPORARY.m_game.m_field_1.get_cell(x, y) << ' ';
+							cout << client.lobby->m_game.m_field_1.get_cell(x, y) << ' ';
 						cout << endl;
 					}
 					cout << endl;
 
 					for (int y = 0; y < 10; ++y) {
 						for (int x = 0; x < 10; ++x)
-							cout << TEMPORARY.m_game.m_field_2.get_cell(x, y) << ' ';
+							cout << client.lobby->m_game.m_field_2.get_cell(x, y) << ' ';
 						cout << endl;
 					}
 					cout << endl;
@@ -130,19 +131,19 @@ void Server::HandleMessageSession(const std::string& msg, participant* sender)
 				return;
 			}
 	}
-	if (TEMPORARY.m_game.get_state() == Game::egs::turn_1 || TEMPORARY.m_game.get_state() == Game::egs::turn_2) {
+	if (client.lobby->m_game.get_state() == Game::egs::turn_1 || client.lobby->m_game.get_state() == Game::egs::turn_2) {
 		cout << "Turns " << msg.size() << endl;
-		if ((TEMPORARY.m_game.get_state() == Game::egs::turn_1 && TEMPORARY.IsParticipant1(sender)) || \
-			(TEMPORARY.m_game.get_state() == Game::egs::turn_2 && TEMPORARY.IsParticipant2(sender))) {
+		if ((client.lobby->m_game.get_state() == Game::egs::turn_1 && client.lobby->IsParticipant1(sender)) || \
+			(client.lobby->m_game.get_state() == Game::egs::turn_2 && client.lobby->IsParticipant2(sender))) {
 			if (msg.size() == 3)
 				if (msg[0] >= '0' && msg[0] <= '9' && \
 					msg[1] == ' ' && \
 					msg[2] >= '0' && msg[2] <= '9') {
 					field* my_field;
-					if (TEMPORARY.IsParticipant1(sender))
-						my_field = &TEMPORARY.m_game.m_field_2;
+					if (client.lobby->IsParticipant1(sender))
+						my_field = &client.lobby->m_game.m_field_2;
 					else
-						my_field = &TEMPORARY.m_game.m_field_1;
+						my_field = &client.lobby->m_game.m_field_1;
 
 					int x = msg[0] - '0';
 					int y = msg[2] - '0';
@@ -177,7 +178,7 @@ void Server::HandleMessageSession(const std::string& msg, participant* sender)
 							sh[4] = '0' + y;
 							set_msg(sh); // победа
 							WriteLobby(sendMsg, sender);
-							TEMPORARY.m_game.set_state(Game::egs::end);
+							client.lobby->m_game.set_state(Game::egs::end);
 							return;
 						}
 
@@ -205,7 +206,7 @@ void Server::HandleMessageSession(const std::string& msg, participant* sender)
 		WriteLobby(sendMsg, sender);
 		return;
 	}
-	if (TEMPORARY.m_game.get_state() == Game::egs::end) {
+	if (client.lobby->m_game.get_state() == Game::egs::end) {
 		set_msg("!"); // сейчас сообщения о том, кто победитель, никак не обрабатывается
 		WriteEnemy(sendMsg, sender);
 		return;
