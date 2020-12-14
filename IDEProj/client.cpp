@@ -23,17 +23,123 @@ void Client::HandleMessage(const std::string& msg)
    }
 }
 
+void Client::HandleSendMessage(const std::string& line)
+{
+	if (!receive) {
+		using namespace std; // For strlen and memcpy.
+		message msg;
+		msg.body_length(line.size());
+		memcpy(msg.body(), line.c_str(), msg.body_length());
+		msg.encode_header();
+
+		switch (state)
+		{
+		case ClientState::connected:
+			HandleSendMessageConnected(line, msg);
+			break;
+
+		case ClientState::lobby:
+			HandleSendMessageLobby(line, msg);
+			break;
+
+		case ClientState::session:
+			HandleSendMessageSession(line, msg);
+			break;
+		}
+	}
+}
+
 void Client::HandleMessageConnected(const std::string& msg)
 {
-	
-	if (msg == "q") {
+	switch (msg[0])
+	{
+	case 'q':
 		cout << "\x1B[92mThanks for playing!\x1B[0m" << endl;
 		// Add the ability to close the console
+		break;
+	
+	case 'j':
+		cout << "You joined lobby. Moving directly to the session for now" << endl;
+		state = ClientState::lobby;
+		break;
+	
+	case 'c':
+		cout << "Lobby was created. Moving directly to the session for now" << endl;
+		state = ClientState::lobby;
+		break;
+
+	case 'l':
+		cout << "Oh, we will add the list soon..." << endl;
+		state = ClientState::connected;
+		break;
+
+	default:
+		throw(std::exception("Wrong message received?"));
+		break;
 	}
+}
+
+void Client::HandleSendMessageConnected(const std::string& line, message& msg)
+{
+	// Add  list and connect?
+	if (line == "join" || line == "create" || line == "quit" || line == "list" || std::string(line.c_str(), 7) == "connect")
+	{
+		write(msg);
+		receive = false;
+	} 
+	else
+	{
+		cout << "\x1B[31mInvalid input!\x1B[0m" << endl;
+		return;
+	}
+
 }
 
 void Client::HandleMessageLobby(const std::string& msg)
 {
+	switch (msg[0])
+	{
+	case 'q':
+		cout << "\x1B[92mThanks for playing! You will be returned to home.\x1B[0m" << endl;
+		state = ClientState::connected;
+		HandleMessageConnected("l");
+		break;
+
+	case 'r':
+		cout << "You are ready to start the game. The game is starting soon!" << endl;
+		//ready = true;
+		state = ClientState::lobby;
+		break;
+
+	case 's':
+		cout << "Let's start the game. Good luck!" << endl;
+		//ready = true;
+		state = ClientState::session;
+		//HandleSendMessageSession("d");
+		break;
+
+	case 'f':
+		cout << "Waiting for all player..." << endl;;
+		break;
+
+	default:
+		throw(std::exception("Wrong message received?"));
+		break;
+	}
+}
+
+void Client::HandleSendMessageLobby(const std::string& line, message& msg)
+{
+	if (line == "ready" || line == "start" || line == "quit")
+	{
+		write(msg);
+		receive = false;
+	}
+	else
+	{
+		cout << "\x1B[31mInvalid input!\x1B[0m" << endl;
+		return;
+	}
 }
 
 void Client::HandleMessageSession(const std::string& msg)
@@ -42,7 +148,8 @@ void Client::HandleMessageSession(const std::string& msg)
 	case egs::preparation:
 	{
 		if (ready == true) {
-			switch (msg[0]) {
+			switch (msg[0]) 
+			{
 			case 't':
 				gui->draw();
 				second_turn = true;
@@ -65,6 +172,7 @@ void Client::HandleMessageSession(const std::string& msg)
 				gui->draw();
 				receive = false;
 				break;
+			
 			case 'f':
 				gui->draw();
 				receive = false;
@@ -77,9 +185,9 @@ void Client::HandleMessageSession(const std::string& msg)
 
 	case egs::my_turn:
 	{
-		switch (msg[0]) {
+		switch (msg[0]) 
+		{
 		case 'h':
-
 			m_en.set_cell(msg[2] - '0', msg[4] - '0', cell::ship | cell::shot);
 			gui->draw();
 			receive = false; // продолжаем стрелять
@@ -115,6 +223,7 @@ void Client::HandleMessageSession(const std::string& msg)
 			cout << "\x1B[0m";
 			receive = false; // продолжаем стрелять
 			break;
+
 		default:
 			throw(std::exception("Wrong message received?"));
 
@@ -124,29 +233,34 @@ void Client::HandleMessageSession(const std::string& msg)
 
 	case egs::enemy_turn:
 	{
-		switch (msg[0]) {
+		switch (msg[0]) 
+		{
 		case 'h':
 			m_my.set_cell(msg[2] - '0', msg[4] - '0', cell::ship | cell::shot);
 			gui->draw();
 			receive = false; // продолжаем стрелять
 			break;
+
 		case 'k':
 			m_my.set_cell(msg[2] - '0', msg[4] - '0', cell::ship | cell::shot);
 			m_my.kill(msg[2] - '0', msg[4] - '0');
 			gui->draw();
 			receive = false; // продолжаем стрелять
 			break;
+
 		case 'm':
 			m_my.set_cell(msg[2] - '0', msg[4] - '0', cell::shot);
 			gameState = egs::my_turn;
 			gui->draw();
 			receive = false; // передаём ход сопернику
 			break;
+
 		case 'f':
 			gui->draw();
 			cout << "Not your turn";
 			receive = false; // продолжаем стрелять
 			break;
+
 		case 'g':
 			m_my.set_cell(msg[2] - '0', msg[4] - '0', cell::ship | cell::shot);
 			m_my.kill(msg[2] - '0', msg[4] - '0');
@@ -155,6 +269,7 @@ void Client::HandleMessageSession(const std::string& msg)
 			cout << "\x1B[91mYou lost!\x1B[0m" << endl;
 			receive = false;
 			break;
+
 		default:
 			throw(std::exception("Wrong message received?"));
 		}
@@ -173,92 +288,52 @@ void Client::HandleMessageSession(const std::string& msg)
 	}
 }
 
-
-void Client::HandleSendMessage(const std::string& line)
-{
-	if (!receive) {
-		using namespace std; // For strlen and memcpy.
-		message msg;
-		msg.body_length(line.size());
-		memcpy(msg.body(), line.c_str(), msg.body_length());
-		msg.encode_header();
-
-		switch (state)
-		{
-		case ClientState::connected:
-			HandleSendMessageConnected(line, msg);
-			break;
-		case ClientState::lobby:
-			HandleSendMessageLobby(line, msg);
-			break;
-		case ClientState::session:
-			HandleSendMessageSession(line, msg);
-			break;
-		}
-	}
-}
-
-void Client::HandleSendMessageConnected(const std::string& line, message& msg)
-{
-	if (line == "create")
-	{
-		// TODO: client should wait for the server reply that lobby was created
-		cout << "Lobby was created. Moving directly to the session for now" << endl;
-		state = ClientState::session;
-      write(msg);
-      receive = false;
-	}
-}
-
-void Client::HandleSendMessageLobby(const std::string& line, message& msg)
-{
-}
-
 void Client::HandleSendMessageSession(const std::string& line, message& msg)
 {
-   if (gameState == egs::preparation) {
-      if (line.size() == 9 && line[0] == 's' && line[2] >= '0' &&
-         line[2] <= '9' && line[4] >= '0' && line[4] <= '9' &&
-         line[6] >= '1' && line[6] <= '4' && (line[8] == 'v' || line[8] == 'h')) {
-         if (!m_my.set_ship(line[2] - '0', line[4] - '0', line[6] - '0', line[8])) {
-            gui->draw();
-            cout << "\x1B[31mInvalid placement!\x1B[0m" << endl;
-            return;
-         }
-         // we want to check here our placement
-         write(msg);
-         receive = true;
-         return;
-      } // s x y w d command
+	if (gameState == egs::preparation) {
+		if (line.size() == 9 && line[0] == 's' && line[2] >= '0' &&
+			line[2] <= '9' && line[4] >= '0' && line[4] <= '9' &&
+			line[6] >= '1' && line[6] <= '4' && (line[8] == 'v' || line[8] == 'h')) {
+			if (!m_my.set_ship(line[2] - '0', line[4] - '0', line[6] - '0', line[8])) {
+				gui->draw();
+				cout << "\x1B[31mInvalid placement!\x1B[0m" << endl;
+				return;
+			}
+			// we want to check here our placement
+			write(msg);
+			receive = true;
+			return;
+		} // s x y w d command
 
-      if (line.size() == 1 && line[0] == 'r') {
-         if (m_my.ships_ready()) {
-            ready = true;
-            write(msg);
-            receive = true;
-            return;
-         } else {
-            gui->draw();
-            cout << "\x1B[31mShips not ready!\x1B[0m" << endl;
-            return;
-         }
-      }
-      gui->draw();
-      cout << "\x1B[31mInvalid input!\x1B[0m" << endl;
-      // otherwise we don't send anything
-   }
-   // turns
-   if (gameState == egs::my_turn) {
-      if (line.size() == 3 && line[0] >= '0' && line[0] <= '9' &&
-         line[2] >= '0' && line[2] <= '9') {
-         write(msg);
-         receive = true;
-         return;
-      }
-      // otherwise we don't send anything
-   }
+		if (line.size() == 1 && line[0] == 'r') {
+			if (m_my.ships_ready()) {
+				ready = true;
+				write(msg);
+				receive = true;
+				return;
+			}
+			else {
+				gui->draw();
+				cout << "\x1B[31mShips not ready!\x1B[0m" << endl;
+				return;
+			}
+		}
+		gui->draw();
+		cout << "\x1B[31mInvalid input!\x1B[0m" << endl;
+		// otherwise we don't send anything
+	}
+	// turns
+	if (gameState == egs::my_turn) {
+		if (line.size() == 3 && line[0] >= '0' && line[0] <= '9' &&
+			line[2] >= '0' && line[2] <= '9') {
+			write(msg);
+			receive = true;
+			return;
+		}
+		// otherwise we don't send anything
+	}
 
-   if (gameState == egs::end) {
-      write(msg);
-   }
+	if (gameState == egs::end) {
+		write(msg);
+	}
 }

@@ -29,31 +29,39 @@ void Server::HandleMessageConnected(const std::string& msg, participant* sender)
 	};
 	// TODO: This should be implemented properly
 	if (msg == "create") {
-      static int lobbiesCount = 0;
 		Lobby& lobby = lobbies[lobbiesCount++];
-		//lobbies.insert(lobby);
 		SharedClient& client = clentData[sender];
-		client.state = ClientState::session;
+		client.state = ClientState::lobby;
 		client.lobby = &lobby;
 		HandleMessageLobby(msg, sender);
-	}
-	
-	if (msg == "join") {
 
-		if (TEMPORARY.AddParticipant(sender)) {
+		set_msg("c");
+		WriteMsg(sendMsg, sender);
+	}
+	bool check = false;
+	if (msg == "join") {
+		for (int i = 0; i < lobbiesCount; i++) {
+			if (lobbies[i].AddParticipant(sender)) {
+				TEMPORARY = lobbies[lobbiesCount];
+				check = true;
+				break;
+			}
+		}
+		if (check) {
 			SharedClient& client = clentData[sender];
-			client.state = ClientState::session;
+			client.state = ClientState::lobby;
 			client.lobby = &TEMPORARY;
 			HandleMessageLobby(msg, sender);
 		}
 		else {
-			Lobby lobby;
-			//lobbies.insert(lobby);
+			Lobby& lobby = lobbies[lobbiesCount++];
 			SharedClient& client = clentData[sender];
-			client.state = ClientState::session;
+			client.state = ClientState::lobby;
 			client.lobby = &lobby;
 			HandleMessageLobby(msg, sender);
 		}
+		set_msg("j");
+		WriteMsg(sendMsg, sender);
 	}
 
 	if (msg == "quit") {
@@ -65,6 +73,46 @@ void Server::HandleMessageConnected(const std::string& msg, participant* sender)
 
 void Server::HandleMessageLobby(const std::string& msg, participant* sender)
 {
+	auto set_msg = [&](const char* line)
+	{
+		sendMsg.body_length(strlen(line));
+		memcpy(sendMsg.body(), line, sendMsg.body_length());
+		sendMsg.encode_header();
+	};
+	// TODO: This should be implemented properly
+	if (msg == "start") {
+		SharedClient& client = clentData[sender];
+		Lobby* lobby = client.lobby;
+		if (clentData[lobby->GetEnemy(sender)].isReady)
+		{
+			clentData[sender].state = ClientState::session;
+			clentData[lobby->GetEnemy(sender)].state = ClientState::session;
+			clentData[sender].isReady = true;
+			set_msg("s");
+			WriteMsg(sendMsg, sender);
+			WriteMsg(sendMsg, (lobby->GetEnemy(sender)));
+		}
+		else {
+			set_msg("f");
+			WriteMsg(sendMsg, sender);
+		}
+	}
+
+	if (msg == "ready") {	
+		SharedClient& client = clentData[sender];
+		client.state = ClientState::lobby;
+		clentData[sender].isReady = true;
+		set_msg("r");
+		WriteMsg(sendMsg, sender);
+	}
+
+	if (msg == "quit") {
+		cout << "\x1B[92mPlayer leave\x1B[0m" << endl;
+		SharedClient& client = clentData[sender];
+		client.lobby->RemoveParticipant(sender);
+		set_msg("q");
+		WriteMsg(sendMsg, sender);
+	}
 }
 
 void Server::HandleMessageSession(const std::string& msg, participant* sender)
