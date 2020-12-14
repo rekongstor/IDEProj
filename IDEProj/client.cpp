@@ -30,7 +30,6 @@ void Client::HandleMessageConnected(const std::string& msg)
 		cout << "\x1B[92mThanks for playing!\x1B[0m" << endl;
 		// Add the ability to close the console
 	}
-	
 }
 
 void Client::HandleMessageLobby(const std::string& msg)
@@ -174,61 +173,92 @@ void Client::HandleMessageSession(const std::string& msg)
 	}
 }
 
+
 void Client::HandleSendMessage(const std::string& line)
 {
 	if (!receive) {
 		using namespace std; // For strlen and memcpy.
-		message boostMessage;
-		boostMessage.body_length(line.size());
-		memcpy(boostMessage.body(), line.c_str(), boostMessage.body_length());
-		boostMessage.encode_header();
+		message msg;
+		msg.body_length(line.size());
+		memcpy(msg.body(), line.c_str(), msg.body_length());
+		msg.encode_header();
 
-		if (gameState == egs::preparation) {
-			if (line.size() == 9 && line[0] == 's' && line[2] >= '0' &&
-				line[2] <= '9' && line[4] >= '0' && line[4] <= '9' &&
-				line[6] >= '1' && line[6] <= '4' && (line[8] == 'v' || line[8] == 'h')) {
-				if (!m_my.set_ship(line[2] - '0', line[4] - '0', line[6] - '0', line[8])) {
-					gui->draw();
-					cout << "\x1B[31mInvalid placement!\x1B[0m" << endl;
-					return;
-				}
-				// we want to check here our placement
-				write(boostMessage);
-				receive = true;
-				return;
-			} // s x y w d command
-
-			if (line.size() == 1 && line[0] == 'r') {
-				if (m_my.ships_ready()) {
-					ready = true;
-					write(boostMessage);
-					receive = true;
-					return;
-				} else {
-					gui->draw();
-					cout << "\x1B[31mShips not ready!\x1B[0m" << endl;
-					return;
-				}
-			}
-			gui->draw();
-			cout << "\x1B[31mInvalid input!\x1B[0m" << endl;
-			// otherwise we don't send anything
-		}
-
-		// turns
-		if (gameState == egs::my_turn) {
-			if (line.size() == 3 && line[0] >= '0' && line[0] <= '9' &&
-				line[2] >= '0' && line[2] <= '9') {
-				write(boostMessage);
-				receive = true;
-				return;
-			}
-			// otherwise we don't send anything
-		}
-
-		if (gameState == egs::end) {
-			write(boostMessage);
-			return;
+		switch (state)
+		{
+		case ClientState::connected:
+			HandleSendMessageConnected(line, msg);
+			break;
+		case ClientState::lobby:
+			HandleSendMessageLobby(line, msg);
+			break;
+		case ClientState::session:
+			HandleSendMessageSession(line, msg);
+			break;
 		}
 	}
+}
+
+void Client::HandleSendMessageConnected(const std::string& line, message& msg)
+{
+	if (line == "create")
+	{
+		// TODO: client should wait for the server reply that lobby was created
+		cout << "Lobby was created. Moving directly to the session for now" << endl;
+		state = ClientState::session;
+      write(msg);
+      receive = false;
+	}
+}
+
+void Client::HandleSendMessageLobby(const std::string& line, message& msg)
+{
+}
+
+void Client::HandleSendMessageSession(const std::string& line, message& msg)
+{
+   if (gameState == egs::preparation) {
+      if (line.size() == 9 && line[0] == 's' && line[2] >= '0' &&
+         line[2] <= '9' && line[4] >= '0' && line[4] <= '9' &&
+         line[6] >= '1' && line[6] <= '4' && (line[8] == 'v' || line[8] == 'h')) {
+         if (!m_my.set_ship(line[2] - '0', line[4] - '0', line[6] - '0', line[8])) {
+            gui->draw();
+            cout << "\x1B[31mInvalid placement!\x1B[0m" << endl;
+            return;
+         }
+         // we want to check here our placement
+         write(msg);
+         receive = true;
+         return;
+      } // s x y w d command
+
+      if (line.size() == 1 && line[0] == 'r') {
+         if (m_my.ships_ready()) {
+            ready = true;
+            write(msg);
+            receive = true;
+            return;
+         } else {
+            gui->draw();
+            cout << "\x1B[31mShips not ready!\x1B[0m" << endl;
+            return;
+         }
+      }
+      gui->draw();
+      cout << "\x1B[31mInvalid input!\x1B[0m" << endl;
+      // otherwise we don't send anything
+   }
+   // turns
+   if (gameState == egs::my_turn) {
+      if (line.size() == 3 && line[0] >= '0' && line[0] <= '9' &&
+         line[2] >= '0' && line[2] <= '9') {
+         write(msg);
+         receive = true;
+         return;
+      }
+      // otherwise we don't send anything
+   }
+
+   if (gameState == egs::end) {
+      write(msg);
+   }
 }

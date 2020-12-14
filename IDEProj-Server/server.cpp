@@ -3,7 +3,6 @@
 #include <iostream>
 using namespace std;
 
-
 void Server::HandleMessage(const std::string& msg, participant* sender)
 {
    switch (clentData[sender].state)
@@ -30,7 +29,8 @@ void Server::HandleMessageConnected(const std::string& msg, participant* sender)
 	};
 	// TODO: This should be implemented properly
 	if (msg == "create") {
-		Lobby lobby;
+      static int lobbiesCount = 0;
+		Lobby& lobby = lobbies[lobbiesCount++];
 		//lobbies.insert(lobby);
 		SharedClient& client = clentData[sender];
 		client.state = ClientState::session;

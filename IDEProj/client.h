@@ -19,7 +19,7 @@ class Client
 {
 public:  
 	egs gameState;
-	ClientState state = ClientState::session;
+	ClientState state = ClientState::connected;
 	ConsoleGui* gui;
 	
 	/// Переменная, отвечающая за готовность расстановки кораблей
@@ -38,7 +38,10 @@ public:
 	void HandleMessageLobby(const std::string& msg);
 	void HandleMessageSession(const std::string& msg);
 
-	void HandleSendMessage(const std::string& line);
+   void HandleSendMessage(const std::string& line);
+   void HandleSendMessageConnected(const std::string& line, message& msg);
+   void HandleSendMessageLobby(const std::string& line, message& msg);
+   void HandleSendMessageSession(const std::string& line, message& msg);
 
 	virtual void write(const message& msg) = 0;
 };

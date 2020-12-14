@@ -12,7 +12,7 @@ class message;
 class Server
 {
 public:
-	std::set<Lobby> lobbies;
+	std::map<int, Lobby> lobbies;
 	std::map<participant*, SharedClient> clentData;
 	message sendMsg;
 
