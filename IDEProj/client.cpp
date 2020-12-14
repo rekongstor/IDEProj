@@ -25,6 +25,12 @@ void Client::HandleMessage(const std::string& msg)
 
 void Client::HandleMessageConnected(const std::string& msg)
 {
+	
+	if (msg == "q") {
+		cout << "\x1B[92mThanks for playing!\x1B[0m" << endl;
+		// Add the ability to close the console
+	}
+	
 }
 
 void Client::HandleMessageLobby(const std::string& msg)

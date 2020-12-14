@@ -22,12 +22,44 @@ void Server::HandleMessage(const std::string& msg, participant* sender)
 
 void Server::HandleMessageConnected(const std::string& msg, participant* sender)
 {
+	auto set_msg = [&](const char* line)
+	{
+		sendMsg.body_length(strlen(line));
+		memcpy(sendMsg.body(), line, sendMsg.body_length());
+		sendMsg.encode_header();
+	};
 	// TODO: This should be implemented properly
-	if (TEMPORARY.AddParticipant(sender)) {
+	if (msg == "create") {
+		Lobby lobby;
+		//lobbies.insert(lobby);
 		SharedClient& client = clentData[sender];
 		client.state = ClientState::session;
-		client.lobby = &TEMPORARY;
-		HandleMessageSession(msg, sender);
+		client.lobby = &lobby;
+		HandleMessageLobby(msg, sender);
+	}
+	
+	if (msg == "join") {
+
+		if (TEMPORARY.AddParticipant(sender)) {
+			SharedClient& client = clentData[sender];
+			client.state = ClientState::session;
+			client.lobby = &TEMPORARY;
+			HandleMessageLobby(msg, sender);
+		}
+		else {
+			Lobby lobby;
+			//lobbies.insert(lobby);
+			SharedClient& client = clentData[sender];
+			client.state = ClientState::session;
+			client.lobby = &lobby;
+			HandleMessageLobby(msg, sender);
+		}
+	}
+
+	if (msg == "quit") {
+			cout << "\x1B[92mPlayer leave\x1B[0m" << endl;
+			set_msg("q");
+			WriteMsg(sendMsg, sender);
 	}
 }
 

@@ -14,7 +14,7 @@ class Server
 public:
 	std::set<Lobby> lobbies;
 	std::map<participant*, SharedClient> clentData;
-   message sendMsg;
+	message sendMsg;
 
 	Lobby TEMPORARY;
 
