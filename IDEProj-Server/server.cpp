@@ -3,23 +3,20 @@
 #include <iostream>
 using namespace std;
 
-void Server::HandleMessage(const std::string& msg, participant* sender)
+bool Server::HandleMessage(const std::string& msg, participant* sender)
 {
    switch (clentData[sender].state)
    {
    case ClientState::connected:
-		HandleMessageConnected(msg, sender);
-      break;
+		return HandleMessageConnected(msg, sender);
    case ClientState::lobby:
-		HandleMessageLobby(msg, sender);
-      break;
+		return HandleMessageLobby(msg, sender);
    case ClientState::session:
-		HandleMessageSession(msg, sender);
-      break;
+		return HandleMessageSession(msg, sender);
    }
 }
 
-void Server::HandleMessageConnected(const std::string& msg, participant* sender)
+bool Server::HandleMessageConnected(const std::string& msg, participant* sender)
 {
 	auto set_msg = [&](const char* line)
 	{
@@ -61,13 +58,15 @@ void Server::HandleMessageConnected(const std::string& msg, participant* sender)
 			set_msg("q");
 			WriteMsg(sendMsg, sender);
 	}
+	return true;
 }
 
-void Server::HandleMessageLobby(const std::string& msg, participant* sender)
+bool Server::HandleMessageLobby(const std::string& msg, participant* sender)
 {
+	return true;
 }
 
-void Server::HandleMessageSession(const std::string& msg, participant* sender)
+bool Server::HandleMessageSession(const std::string& msg, participant* sender)
 {
 	SharedClient& client = clentData[sender];
 	auto set_msg = [&](const char* line)
@@ -118,12 +117,12 @@ void Server::HandleMessageSession(const std::string& msg, participant* sender)
 					set_msg("f");
 					cout << "Placement error" << endl;
 					WriteMsg(sendMsg, sender);
-					return;
+					return true;
 				}
 
 				set_msg("d");
 				WriteMsg(sendMsg, sender);
-				return;
+				return true;
 			}
 		if (msg.size() == 1)
 			if (msg[0] == 'r') {
@@ -158,9 +157,9 @@ void Server::HandleMessageSession(const std::string& msg, participant* sender)
 					}
 					cout << endl;
 
-					return;
+					return true;
 				}
-				return;
+				return true;
 			}
 	}
 	if (client.lobby->m_game.get_state() == Game::egs::turn_1 || client.lobby->m_game.get_state() == Game::egs::turn_2) {
@@ -187,7 +186,7 @@ void Server::HandleMessageSession(const std::string& msg, participant* sender)
 						cout << "Turn repeat - failed " << msg << endl;
 						set_msg("f"); // выстрел туда же?
 						WriteMsg(sendMsg, sender);
-						return;
+						return true;
 					}
 
 					if (c & cell::ship) {
@@ -211,11 +210,11 @@ void Server::HandleMessageSession(const std::string& msg, participant* sender)
 							set_msg(sh); // победа
 							WriteLobby(sendMsg, sender);
 							client.lobby->m_game.set_state(Game::egs::end);
-							return;
+							return true;
 						}
 
 						WriteLobby(sendMsg, sender);
-						return;
+						return true;
 					} else {
 						cout << "Miss " << msg << endl;
 						char sh[] = "m x y";
@@ -224,26 +223,27 @@ void Server::HandleMessageSession(const std::string& msg, participant* sender)
 						set_msg(sh); // попадание
 						swap_state();
 						WriteLobby(sendMsg, sender);
-						return;
+						return true;
 					}
 				}
 		} else {
 			cout << "Turn order - failed " << msg << endl;
 			set_msg("f"); // ход не в своё время
 			WriteMsg(sendMsg, sender);
-			return;
+			return true;
 		}
 
 
 		WriteLobby(sendMsg, sender);
-		return;
+		return true;
 	}
 	if (client.lobby->m_game.get_state() == Game::egs::end) {
 		set_msg("!"); // сейчас сообщения о том, кто победитель, никак не обрабатывается
 		WriteEnemy(sendMsg, sender);
-		return;
+		return true;
 	}
 	set_msg("f"); // это сообщение об ошибке, да?
 	WriteMsg(sendMsg, sender);
 	cout << this << ": " << msg << endl;
+	return true; // return false? тогда клиент должен удалиться
 }

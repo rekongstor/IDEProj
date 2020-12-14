@@ -61,28 +61,32 @@ void BoostSession::handle_read_header(const boost::system::error_code& error)
 	}
 }
 
-void BoostSession::decode_body()
+bool BoostSession::decode_body()
 {
 	m_read_msg.body()[m_read_msg.body_length()] = 0; // тут нужно слегка отсечь ненужный кусок сообщения
 	string msg = m_read_msg.body(); // теперь обрабатываем сообщение через эту тему, а отправляемое оставляем в m_read_msg.body()
 	cout << this << ": " << msg << endl;
 
-	m_room.myServer->HandleMessage(msg, this);
+	return m_room.myServer->HandleMessage(msg, this);
 }
 
 void BoostSession::handle_read_body(const boost::system::error_code& error)
 {
 	if (!error)
 	{
-		decode_body();
+		if (decode_body()) {
 
-		//deliver(m_read_msg);
-		//m_room.deliver(m_read_msg);
 
-		boost::asio::async_read(m_socket,
-			boost::asio::buffer(m_read_msg.data(), message::header_length),
-			boost::bind(&BoostSession::handle_read_header, shared_from_this(),
-				boost::asio::placeholders::error));
+			//deliver(m_read_msg);
+			//m_room.deliver(m_read_msg);
+
+			boost::asio::async_read(m_socket,
+				boost::asio::buffer(m_read_msg.data(), message::header_length),
+				boost::bind(&BoostSession::handle_read_header, shared_from_this(),
+					boost::asio::placeholders::error));
+		} else {
+			m_room.leave(shared_from_this());
+		}
 	}
 	else
 	{

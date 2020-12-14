@@ -21,9 +21,9 @@ public:
 	virtual void WriteMsg(const message& msg, participant* participant) = 0;
 	virtual void WriteLobby(const message& msg, participant* participant) = 0;
 	virtual void WriteEnemy(const message& msg, participant* participant) = 0;
-	void HandleMessage(const std::string& msg, participant* sender);
-	void HandleMessageConnected(const std::string& msg, participant* sender);
-	void HandleMessageLobby(const std::string& msg, participant* sender);
-	void HandleMessageSession(const std::string& msg, participant* sender);
+   bool HandleMessage(const std::string& msg, participant* sender);
+   bool HandleMessageConnected(const std::string& msg, participant* sender);
+   bool HandleMessageLobby(const std::string& msg, participant* sender);
+   bool HandleMessageSession(const std::string& msg, participant* sender);
 };
 
