@@ -24,7 +24,7 @@ bool Server::HandleMessageConnected(const std::string& msg, participant* sender)
 		memcpy(sendMsg.body(), line, sendMsg.body_length());
 		sendMsg.encode_header();
 	};
-	// TODO: This should be implemented properly
+
 	if (msg == "create") {
 		Lobby& lobby = lobbies[lobbiesCount++];
 		SharedClient& client = clentData[sender];
@@ -39,7 +39,7 @@ bool Server::HandleMessageConnected(const std::string& msg, participant* sender)
 	if (msg == "join") {
 		for (int i = 0; i < lobbiesCount; i++) {
 			if (lobbies[i].AddParticipant(sender)) {
-				TEMPORARY = lobbies[lobbiesCount];
+				lobby = lobbies[lobbiesCount];
 				check = true;
 				break;
 			}
@@ -47,22 +47,55 @@ bool Server::HandleMessageConnected(const std::string& msg, participant* sender)
 		if (check) {
 			SharedClient& client = clentData[sender];
 			client.state = ClientState::lobby;
-			client.lobby = &TEMPORARY;
-			HandleMessageLobby(msg, sender);
+			client.lobby = &lobby;
 		}
 		else {
-			Lobby& lobby = lobbies[lobbiesCount++];
+			Lobby& newLobby = lobbies[lobbiesCount++];
 			SharedClient& client = clentData[sender];
 			client.state = ClientState::lobby;
-			client.lobby = &lobby;
-			HandleMessageLobby(msg, sender);
+			client.lobby = &newLobby;
 		}
 		set_msg("j");
 		WriteMsg(sendMsg, sender);
 	}
 
+	if (std::string(msg.c_str(), 7) == "connect")
+	{
+		int id = atoi((msg.substr(11, msg.length()).c_str()));
+		if (id <= lobbiesCount) 
+		{
+			if (lobbies[id].AddParticipant(sender))
+			{
+				lobby = lobbies[id];
+				SharedClient& client = clentData[sender];
+				client.state = ClientState::lobby;
+				client.lobby = &lobby;
+				
+				set_msg("i");
+				WriteMsg(sendMsg, sender);
+			}
+		}
+		else
+		{
+			set_msg("r");
+			WriteMsg(sendMsg, sender);
+		}
+	}
+
+	/*
+	if (msg == "list") {
+		const char* list = "l ";
+		for (int i = 0; i < lobbies.size(); i++) 
+		{
+			list = list + char(i) + ' ';
+		}
+		set_msg(list);
+		WriteMsg(sendMsg, sender);
+	}
+	*/
+
 	if (msg == "quit") {
-			cout << "\x1B[92mPlayer leave\x1B[0m" << endl;
+			cout << "Player leave" << endl;
 			set_msg("q");
 			WriteMsg(sendMsg, sender);
 			return false;
@@ -78,7 +111,7 @@ bool Server::HandleMessageLobby(const std::string& msg, participant* sender)
 		memcpy(sendMsg.body(), line, sendMsg.body_length());
 		sendMsg.encode_header();
 	};
-	// TODO: This should be implemented properly
+
 	if (msg == "start") {
 		SharedClient& client = clentData[sender];
 		Lobby* lobby = client.lobby;
@@ -105,10 +138,29 @@ bool Server::HandleMessageLobby(const std::string& msg, participant* sender)
 		WriteMsg(sendMsg, sender);
 	}
 
-	if (msg == "quit") {
-		cout << "\x1B[92mPlayer leave\x1B[0m" << endl;
+	if (msg == "unready") {
+		SharedClient& client = clentData[sender];
+		client.state = ClientState::lobby;
+		clentData[sender].isReady = false;
+		set_msg("u");
+		WriteMsg(sendMsg, sender);
+	}
+
+	if (msg == "leave") {
+		cout << "Player leave" << endl;
 		SharedClient& client = clentData[sender];
 		client.lobby->RemoveParticipant(sender);
+		if (!client.lobby->RemoveParticipant(sender)) 
+		{
+			lobbiesCount--;
+			//lobbies.erase(client.lobby);
+		}
+		set_msg("l");
+		WriteMsg(sendMsg, sender);
+	}
+
+	if (msg == "quit") {
+		cout << "Player leave" << endl;
 		set_msg("q");
 		WriteMsg(sendMsg, sender);
 		return false;

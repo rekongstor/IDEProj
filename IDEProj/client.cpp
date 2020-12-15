@@ -54,27 +54,55 @@ void Client::HandleMessageConnected(const std::string& msg)
 	switch (msg[0])
 	{
 	case 'q':
-		cout << "\x1B[92mThanks for playing!\x1B[0m" << endl;
+		cout << "Thanks for playing!" << endl;
 		// Add the ability to close the console
 		break;
 	
 	case 'j':
 		cout << "You joined lobby. Moving directly to the session for now" << endl;
 		state = ClientState::lobby;
+		receive = false;
 		break;
 	
 	case 'c':
 		cout << "Lobby was created. Moving directly to the session for now" << endl;
 		state = ClientState::lobby;
+		receive = false;
 		break;
 
-	case 'l':
-		cout << "Oh, we will add the list soon..." << endl;
-		state = ClientState::connected;
+	case 'i':
+		cout << "You joined lobby. Moving directly to the session for now" << endl;
+		state = ClientState::lobby;
+		receive = false;
 		break;
+
+	case 'r':
+		cout << "Okay, we don't have this lobby :(" << endl;
+		state = ClientState::connected;
+		receive = false;
+		break;
+
+	/*
+	case 'l':
+		if (msg.size() <= 2)
+		{
+			cout << "There is the list of rooms: " << endl;
+			for (int i = 2; i < msg.size(); i + 2) {
+				cout << msg[i] << endl;
+			}
+		}
+		else
+		{
+			cout << "There are no room yet :(" << endl;
+		}
+		state = ClientState::connected;
+		receive = false;
+		break;
+	*/
 
 	default:
 		throw(std::exception("Wrong message received?"));
+		receive = false;
 		break;
 	}
 }
@@ -89,7 +117,8 @@ void Client::HandleSendMessageConnected(const std::string& line, message& msg)
 	} 
 	else
 	{
-		cout << "\x1B[31mInvalid input!\x1B[0m" << endl;
+		cout << "Invalid input!" << endl;
+		receive = false;
 		return;
 	}
 
@@ -99,38 +128,50 @@ void Client::HandleMessageLobby(const std::string& msg)
 {
 	switch (msg[0])
 	{
-	case 'q':
-		cout << "\x1B[92mThanks for playing! You will be returned to home.\x1B[0m" << endl;
+	case 'l':
+		cout << "Thanks for playing! You will be returned to home." << endl;
 		state = ClientState::connected;
-		HandleMessageConnected("l");
+		receive = false;
+		break;
+
+	case 'q':
+		cout << "Thanks for playing! Bye!" << endl;
+		receive = false;
+		break;
+
+	case 'u':
+		cout << "Now you are unready." << endl;
+		state = ClientState::lobby;
+		receive = false;
 		break;
 
 	case 'r':
 		cout << "You are ready to start the game. The game is starting soon!" << endl;
-		//ready = true;
 		state = ClientState::lobby;
+		receive = false;
 		break;
 
 	case 's':
 		cout << "Let's start the game. Good luck!" << endl;
-		//ready = true;
 		state = ClientState::session;
-		//HandleSendMessageSession("d");
+		receive = false;
 		break;
 
 	case 'f':
 		cout << "Waiting for all player..." << endl;;
+		receive = false;
 		break;
 
 	default:
 		throw(std::exception("Wrong message received?"));
+		receive = false;
 		break;
 	}
 }
 
 void Client::HandleSendMessageLobby(const std::string& line, message& msg)
 {
-	if (line == "ready" || line == "start" || line == "quit")
+	if (line == "ready" || line == "start" || line == "quit" || line == "unready" || line == "quit")
 	{
 		write(msg);
 		receive = false;
