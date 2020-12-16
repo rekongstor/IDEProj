@@ -82,23 +82,11 @@ void Client::HandleMessageConnected(const std::string& msg)
 		receive = false;
 		break;
 
-	/*
 	case 'l':
-		if (msg.size() <= 2)
-		{
-			cout << "There is the list of rooms: " << endl;
-			for (int i = 2; i < msg.size(); i + 2) {
-				cout << msg[i] << endl;
-			}
-		}
-		else
-		{
-			cout << "There are no room yet :(" << endl;
-		}
+		cout << msg << endl;
 		state = ClientState::connected;
 		receive = false;
 		break;
-	*/
 
 	default:
 		throw(std::exception("Wrong message received?"));
@@ -109,7 +97,6 @@ void Client::HandleMessageConnected(const std::string& msg)
 
 void Client::HandleSendMessageConnected(const std::string& line, message& msg)
 {
-	// Add  list and connect?
 	if (line == "join" || line == "create" || line == "quit" || line == "list" || std::string(line.c_str(), 7) == "connect")
 	{
 		write(msg);
@@ -171,14 +158,14 @@ void Client::HandleMessageLobby(const std::string& msg)
 
 void Client::HandleSendMessageLobby(const std::string& line, message& msg)
 {
-	if (line == "ready" || line == "start" || line == "quit" || line == "unready" || line == "quit")
+	if (line == "ready" || line == "start" || line == "quit" || line == "unready" || line == "quit" || line == "leave")
 	{
 		write(msg);
 		receive = false;
 	}
 	else
 	{
-		cout << "\x1B[31mInvalid input!\x1B[0m" << endl;
+		cout << "Invalid input!" << endl;
 		return;
 	}
 }

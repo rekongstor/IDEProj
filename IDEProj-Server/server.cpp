@@ -26,36 +26,41 @@ bool Server::HandleMessageConnected(const std::string& msg, participant* sender)
 	};
 
 	if (msg == "create") {
-		Lobby& lobby = lobbies[lobbiesCount++];
+		Lobby& newLobby = lobbies[lobbiesCount];
+		newLobby.id = lobbiesCount;
+		lobbiesCount++;
 		SharedClient& client = clentData[sender];
 		client.state = ClientState::lobby;
-		client.lobby = &lobby;
+		client.lobby = &newLobby;
 		HandleMessageLobby(msg, sender);
 
 		set_msg("c");
 		WriteMsg(sendMsg, sender);
 	}
-	bool check = false;
+
+	
 	if (msg == "join") {
-		for (int i = 0; i < lobbiesCount; i++) {
-			if (lobbies[i].AddParticipant(sender)) {
-				lobby = lobbies[lobbiesCount];
+		bool check = false;
+		for (auto i : lobbies) 
+		{
+			if (i.second.AddParticipant(sender)) 
+			{
+				lobby = lobbies[i.second.id];
+				SharedClient& client = clentData[sender];
+				client.state = ClientState::lobby;
+				client.lobby = &lobby;
 				check = true;
 				break;
 			}
 		}
-		if (check) {
-			SharedClient& client = clentData[sender];
-			client.state = ClientState::lobby;
-			client.lobby = &lobby;
+		if (check)
+		{
+			set_msg("j");
 		}
-		else {
-			Lobby& newLobby = lobbies[lobbiesCount++];
-			SharedClient& client = clentData[sender];
-			client.state = ClientState::lobby;
-			client.lobby = &newLobby;
+		else 
+		{
+			set_msg("r");
 		}
-		set_msg("j");
 		WriteMsg(sendMsg, sender);
 	}
 
@@ -82,17 +87,16 @@ bool Server::HandleMessageConnected(const std::string& msg, participant* sender)
 		}
 	}
 
-	/*
 	if (msg == "list") {
-		const char* list = "l ";
-		for (int i = 0; i < lobbies.size(); i++) 
+		string id = "l ";
+		for (auto i : lobbies) 
 		{
-			list = list + char(i) + ' ';
+			id = id + to_string(i.first) + ' ';
 		}
-		set_msg(list);
+		char array[100];
+		set_msg(strcpy(array, id.c_str()));
 		WriteMsg(sendMsg, sender);
 	}
-	*/
 
 	if (msg == "quit") {
 			cout << "Player leave" << endl;
@@ -114,15 +118,15 @@ bool Server::HandleMessageLobby(const std::string& msg, participant* sender)
 
 	if (msg == "start") {
 		SharedClient& client = clentData[sender];
-		Lobby* lobby = client.lobby;
-		if (clentData[lobby->GetEnemy(sender)].isReady)
+		Lobby* newLobby = client.lobby;
+		if (clentData[newLobby->GetEnemy(sender)].isReady)
 		{
 			clentData[sender].state = ClientState::session;
-			clentData[lobby->GetEnemy(sender)].state = ClientState::session;
+			clentData[newLobby->GetEnemy(sender)].state = ClientState::session;
 			clentData[sender].isReady = true;
 			set_msg("s");
 			WriteMsg(sendMsg, sender);
-			WriteMsg(sendMsg, (lobby->GetEnemy(sender)));
+			WriteMsg(sendMsg, (newLobby->GetEnemy(sender)));
 		}
 		else {
 			set_msg("f");
@@ -153,7 +157,7 @@ bool Server::HandleMessageLobby(const std::string& msg, participant* sender)
 		if (!client.lobby->RemoveParticipant(sender)) 
 		{
 			lobbiesCount--;
-			//lobbies.erase(client.lobby);
+			lobbies.erase(client.lobby->id);
 		}
 		set_msg("l");
 		WriteMsg(sendMsg, sender);
@@ -161,6 +165,13 @@ bool Server::HandleMessageLobby(const std::string& msg, participant* sender)
 
 	if (msg == "quit") {
 		cout << "Player leave" << endl;
+		SharedClient& client = clentData[sender];
+		client.lobby->RemoveParticipant(sender);
+		if (!client.lobby->RemoveParticipant(sender))
+		{
+			lobbiesCount--;
+			lobbies.erase(client.lobby->id);
+		}
 		set_msg("q");
 		WriteMsg(sendMsg, sender);
 		return false;

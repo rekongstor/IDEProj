@@ -6,6 +6,7 @@ class Lobby
 {
 public:
 	Game m_game;
+	int id;
 	
 	participant* m_participant_1;
 	participant* m_participant_2;
