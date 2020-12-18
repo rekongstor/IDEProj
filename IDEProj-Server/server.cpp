@@ -93,6 +93,7 @@ bool Server::HandleMessageConnected(const std::string& msg, participant* sender)
 		{
 			id = id + to_string(i.first) + ' ';
 		}
+		id = id + 'n';
 		char array[100];
 		set_msg(strcpy(array, id.c_str()));
 		WriteMsg(sendMsg, sender);

@@ -51,6 +51,8 @@ void Client::HandleSendMessage(const std::string& line)
 
 void Client::HandleMessageConnected(const std::string& msg)
 {
+	const char* message = msg.c_str();
+	int i = 2;
 	switch (msg[0])
 	{
 	case 'q':
@@ -83,7 +85,11 @@ void Client::HandleMessageConnected(const std::string& msg)
 		break;
 
 	case 'l':
-		cout << msg << endl;
+		while (message[i] != 'n')
+		{
+			cout << message[i] << endl;
+			i = i + 2;
+		}
 		state = ClientState::connected;
 		receive = false;
 		break;
