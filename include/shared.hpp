@@ -15,4 +15,5 @@ struct SharedClient
 	ClientState state = ClientState::connected;
 	Lobby* lobby;
 	bool isReady;
+	bool isWin;
 };

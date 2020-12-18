@@ -183,6 +183,7 @@ bool Server::HandleMessageLobby(const std::string& msg, participant* sender)
 bool Server::HandleMessageSession(const std::string& msg, participant* sender)
 {
 	SharedClient& client = clentData[sender];
+	SharedClient& enemy = clentData[client.lobby->GetEnemy(sender)];
 	auto set_msg = [&](const char* line)
 	{
 		sendMsg.body_length(strlen(line));
@@ -323,7 +324,10 @@ bool Server::HandleMessageSession(const std::string& msg, participant* sender)
 							sh[4] = '0' + y;
 							set_msg(sh); // победа
 							WriteLobby(sendMsg, sender);
+							client.isWin = true;
+							enemy.isWin = false;
 							client.lobby->m_game.set_state(Game::egs::end);
+							enemy.lobby->m_game.set_state(Game::egs::end);
 							return true;
 						}
 
@@ -352,8 +356,24 @@ bool Server::HandleMessageSession(const std::string& msg, participant* sender)
 		return true;
 	}
 	if (client.lobby->m_game.get_state() == Game::egs::end) {
-		set_msg("!"); // сейчас сообщения о том, кто победитель, никак не обрабатывается
-		WriteEnemy(sendMsg, sender);
+		client.state = ClientState::lobby;
+		enemy.state = ClientState::lobby;
+		if (client.isWin)
+		{
+			set_msg("w"); // сейчас сообщения о том, кто победитель, никак не обрабатывается
+			WriteMsg(sendMsg, sender);
+
+			set_msg("l");
+			WriteMsg(sendMsg, client.lobby->GetEnemy(sender));
+		}
+		else
+		{
+			set_msg("l"); // сейчас сообщения о том, кто победитель, никак не обрабатывается
+			WriteMsg(sendMsg, sender);
+
+			set_msg("w");
+			WriteMsg(sendMsg, client.lobby->GetEnemy(sender));
+		}
 		return true;
 	}
 	set_msg("f"); // это сообщение об ошибке, да?
