@@ -32,8 +32,6 @@ bool Server::HandleMessageConnected(const std::string& msg, participant* sender)
 		SharedClient& client = clentData[sender];
 		client.state = ClientState::lobby;
 		client.lobby = &newLobby;
-		HandleMessageLobby(msg, sender);
-
 		set_msg("c");
 		WriteMsg(sendMsg, sender);
 	}
@@ -154,6 +152,7 @@ bool Server::HandleMessageLobby(const std::string& msg, participant* sender)
 	if (msg == "leave") {
 		cout << "Player leave" << endl;
 		SharedClient& client = clentData[sender];
+		client.state = ClientState::connected;
 		client.lobby->RemoveParticipant(sender);
 		if (!client.lobby->RemoveParticipant(sender)) 
 		{

@@ -57,7 +57,6 @@ void Client::HandleMessageConnected(const std::string& msg)
 	{
 	case 'q':
 		cout << "Thanks for playing!" << endl;
-		// Add the ability to close the console
 		break;
 	
 	case 'j':
@@ -123,13 +122,12 @@ void Client::HandleMessageLobby(const std::string& msg)
 	{
 	case 'l':
 		cout << "Thanks for playing! You will be returned to home." << endl;
-		state = ClientState::connected;
 		receive = false;
+		state = ClientState::connected;
 		break;
 
 	case 'q':
 		cout << "Thanks for playing! Bye!" << endl;
-		receive = false;
 		break;
 
 	case 'u':
