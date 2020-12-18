@@ -25,7 +25,6 @@ void Client::HandleMessage(const std::string& msg)
 
 void Client::HandleSendMessage(const std::string& line)
 {
-	if (!receive) {
 		using namespace std; // For strlen and memcpy.
 		message msg;
 		msg.body_length(line.size());
@@ -42,11 +41,12 @@ void Client::HandleSendMessage(const std::string& line)
 			HandleSendMessageLobby(line, msg);
 			break;
 
-		case ClientState::session:
-			HandleSendMessageSession(line, msg);
+      case ClientState::session:
+			if (!receive) {
+				HandleSendMessageSession(line, msg);
+			}
 			break;
 		}
-	}
 }
 
 void Client::HandleMessageConnected(const std::string& msg)
@@ -143,7 +143,7 @@ void Client::HandleMessageLobby(const std::string& msg)
 	case 'r':
 		cout << "You are ready to start the game. The game is starting soon!" << endl;
 		state = ClientState::lobby;
-		receive = false;
+		receive = true;
 		break;
 
 	case 's':

@@ -18,8 +18,6 @@ public:
 	std::map<participant*, SharedClient> clentData;
 	message sendMsg;
 
-	Lobby lobby;
-
    bool HandleMessage(const std::string& msg, participant* sender);
    bool HandleMessageConnected(const std::string& msg, participant* sender);
    bool HandleMessageLobby(const std::string& msg, participant* sender);

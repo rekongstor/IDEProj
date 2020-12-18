@@ -28,13 +28,14 @@ void BoostSession::start()
 
 void BoostSession::deliver(const message& msg)
 {
+   std::string dbgMsg(msg.body(), msg.body_length());
+   OutputDebugString("Server delivers message: ");
+   OutputDebugString(dbgMsg.c_str());
+   OutputDebugString("\n");
+
 	bool write_in_progress = !m_write_msgs_queue.empty();
 	m_write_msgs_queue.push_back(msg);
 
-	std::string dbgMsg(msg.body(), msg.body_length());
-	OutputDebugString("Server delivers message: ");
-	OutputDebugString(dbgMsg.c_str());
-	OutputDebugString("\n");
 
 	if (!write_in_progress)
 	{

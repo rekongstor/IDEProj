@@ -30,63 +30,61 @@ bool Server::HandleMessageConnected(const std::string& msg, participant* sender)
 		newLobby.id = lobbiesCount;
 		lobbiesCount++;
 		SharedClient& client = clentData[sender];
-		lobby.AddParticipant(sender);
+		newLobby.AddParticipant(sender);
 		client.state = ClientState::lobby;
 		client.lobby = &newLobby;
 		set_msg("c");
 		WriteMsg(sendMsg, sender);
+		return true;
 	}
 
 	
 	if (msg == "join") {
-		bool check = false;
-		for (int i = 0; i < lobbies.size(); i++) 
+		for (auto& lobbyPair : lobbies)
 		{
-			if (lobbies[i].AddParticipant(sender))
-			{
-				lobby = lobbies[i];
-				lobby.id = i;
-				lobby.AddParticipant(sender);
-				SharedClient& client = clentData[sender];
-				client.state = ClientState::lobby;
-				client.lobby = &lobby;
-				check = true;
-			}
+			Lobby& lobby = lobbyPair.second;
+		   if (lobby.AddParticipant(sender))
+         {
+            SharedClient& client = clentData[sender];
+            client.state = ClientState::lobby;
+            client.lobby = &lobby;
+            set_msg("j");
+            WriteMsg(sendMsg, sender);
+				return true;
+		   }
 		}
-		if (check)
-		{
-			check = false;
-			set_msg("j");
-		}
-		else 
-		{
-			set_msg("r");
-		}
+      set_msg("r");
 		WriteMsg(sendMsg, sender);
+		return true;
 	}
 
 	if (std::string(msg.c_str(), 7) == "connect")
 	{
 		int id = atoi((msg.substr(11, msg.length()).c_str()));
-		if (id <= lobbiesCount) 
+		auto it = lobbies.find(id);
+		if (it != lobbies.end()) 
 		{
+			Lobby& lobby = it->second;
 			if (lobbies[id].AddParticipant(sender))
 			{
-				lobby = lobbies[id];
-				lobby.id = id;
-				lobby.AddParticipant(sender);
 				SharedClient& client = clentData[sender];
 				client.state = ClientState::lobby;
 				client.lobby = &lobby;
 				
 				set_msg("i");
 				WriteMsg(sendMsg, sender);
-			}
+				return true;
+         } else {
+            set_msg("r");
+            WriteMsg(sendMsg, sender);
+				return true;
+         }
 		}
 		else
 		{
 			set_msg("r");
 			WriteMsg(sendMsg, sender);
+			return true;
 		}
 	}
 
@@ -97,16 +95,17 @@ bool Server::HandleMessageConnected(const std::string& msg, participant* sender)
 			id = id + to_string(i.first) + ' ';
 		}
 		id = id + 'n';
-		char array[100];
-		set_msg(strcpy(array, id.c_str()));
+
+		set_msg(id.c_str());
 		WriteMsg(sendMsg, sender);
+		return true;
 	}
 
 	if (msg == "quit") {
-			cout << "Player leave" << endl;
-			set_msg("q");
-			WriteMsg(sendMsg, sender);
-			return false;
+      cout << "Player leave" << endl;
+      set_msg("q");
+      WriteMsg(sendMsg, sender);
+      return false;
 	}
 	return true;
 }
@@ -120,30 +119,18 @@ bool Server::HandleMessageLobby(const std::string& msg, participant* sender)
 		sendMsg.encode_header();
 	};
 
-	if (msg == "start") {
-		SharedClient& client = clentData[sender];
-		Lobby* newLobby = client.lobby;
-		if (clentData[newLobby->GetEnemy(sender)].isReady)
-		{
-			clentData[sender].state = ClientState::session;
-			clentData[newLobby->GetEnemy(sender)].state = ClientState::session;
-			clentData[sender].isReady = true;
-			set_msg("s");
-			WriteMsg(sendMsg, sender);
-			WriteMsg(sendMsg, (newLobby->GetEnemy(sender)));
-		}
-		else {
-			set_msg("f");
-			WriteMsg(sendMsg, sender);
-		}
-	}
-
 	if (msg == "ready") {	
 		SharedClient& client = clentData[sender];
 		client.state = ClientState::lobby;
 		clentData[sender].isReady = true;
-		set_msg("r");
-		WriteMsg(sendMsg, sender);
+
+      Lobby* newLobby = client.lobby;
+      if (clentData[newLobby->GetEnemy(sender)].isReady)
+      {
+			set_msg("s");
+			WriteLobby(sendMsg, sender);
+      }
+
 	}
 
 	if (msg == "unready") {
@@ -161,7 +148,6 @@ bool Server::HandleMessageLobby(const std::string& msg, participant* sender)
 		client.lobby->RemoveParticipant(sender);
 		if (!client.lobby->RemoveParticipant(sender)) 
 		{
-			lobbiesCount--;
 			lobbies.erase(client.lobby->id);
 		}
 		set_msg("l");

@@ -33,9 +33,6 @@ void BoostServer::handle_accept(session_ptr session,
 void BoostServer::WriteMsg(const message& msg, participant* participant)
 {
 	std::string tmpMsg(msg.body(), msg.body_length());
-	OutputDebugString("Server delivers message: ");
-	OutputDebugString(tmpMsg.c_str());
-	OutputDebugString("\n");
 
    participant->deliver(msg);
 }

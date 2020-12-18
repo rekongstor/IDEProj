@@ -8,6 +8,9 @@ BoostClient::BoostClient(boost::asio::io_service& io_service,
 	: m_io_service_(io_service),
 	m_socket(io_service)
 {
+	time_t t;
+	time(&t);
+	id = t;
 	boost::asio::async_connect(m_socket, endpoint_iterator,
 		boost::bind(&BoostClient::handle_connect, this,
 			boost::asio::placeholders::error));
@@ -16,7 +19,9 @@ BoostClient::BoostClient(boost::asio::io_service& io_service,
 void BoostClient::write(const message& msg)
 {
 	std::string dbgMsg(msg.body(), msg.body_length());
-	OutputDebugString("Client delivers message: ");
+	OutputDebugString("Client ");
+	OutputDebugString(std::to_string(id).c_str());
+	OutputDebugString(" delivers message: ");
 	OutputDebugString(dbgMsg.c_str());
 	OutputDebugString("\n");
 
@@ -60,7 +65,9 @@ void BoostClient::decode_message()
 	
 	string msg = m_read_msg.body();
 
-	OutputDebugString("Client receives message: ");
+   OutputDebugString("Client ");
+   OutputDebugString(std::to_string(id).c_str());
+   OutputDebugString(" receives message: ");
 	OutputDebugString(msg.c_str());
 	OutputDebugString("\n");
 
