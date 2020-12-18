@@ -30,6 +30,7 @@ bool Server::HandleMessageConnected(const std::string& msg, participant* sender)
 		newLobby.id = lobbiesCount;
 		lobbiesCount++;
 		SharedClient& client = clentData[sender];
+		lobby.AddParticipant(sender);
 		client.state = ClientState::lobby;
 		client.lobby = &newLobby;
 		set_msg("c");
@@ -39,12 +40,13 @@ bool Server::HandleMessageConnected(const std::string& msg, participant* sender)
 	
 	if (msg == "join") {
 		bool check = false;
-		for (int i = 0; i <= lobbiesCount; i++) 
+		for (int i = 0; i < lobbies.size(); i++) 
 		{
 			if (lobbies[i].AddParticipant(sender))
 			{
 				lobby = lobbies[i];
 				lobby.id = i;
+				lobby.AddParticipant(sender);
 				SharedClient& client = clentData[sender];
 				client.state = ClientState::lobby;
 				client.lobby = &lobby;
@@ -53,6 +55,7 @@ bool Server::HandleMessageConnected(const std::string& msg, participant* sender)
 		}
 		if (check)
 		{
+			check = false;
 			set_msg("j");
 		}
 		else 
@@ -71,6 +74,7 @@ bool Server::HandleMessageConnected(const std::string& msg, participant* sender)
 			{
 				lobby = lobbies[id];
 				lobby.id = id;
+				lobby.AddParticipant(sender);
 				SharedClient& client = clentData[sender];
 				client.state = ClientState::lobby;
 				client.lobby = &lobby;
