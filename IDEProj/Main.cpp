@@ -34,6 +34,8 @@ Client* cl;
 
 HWND myFieldBtns[10][10];
 HWND enFieldBtns[10][10];
+bool selectedMy[10][10];
+
 HWND btnFunctional[6];
 HWND listBox;
 
@@ -191,7 +193,17 @@ void PrepShip(int fBtn)
 {
    if (cl->state != ClientState::session && cl->gameState != egs::preparation)
       return;
+   int i = fBtn / 10;
+   int j = fBtn % 10;
 
+   ////HBRUSH brush = CreateSolidBrush(RGB(0, 0, 255));
+   //SetClassLongPtr(myFieldBtns[i][j], GCLP_HBRBACKGROUND, (LONG_PTR)brush);
+   //SendMessage(window, WM_CTLCOLORBTN, RGB(0, 0, 255), myFieldId + fBtn);
+}
+
+LRESULT SetBtnClr(int fBtn)
+{
+   return RGB(0, 0, 255);
 }
 
 void Shoot(int fBtn)
@@ -204,6 +216,7 @@ void Shoot(int fBtn)
 
 }
 
+
 long long winProc(HWND window, unsigned msg, WPARAM wp, LPARAM lp)
 {
    if (!isActive)
@@ -215,6 +228,11 @@ long long winProc(HWND window, unsigned msg, WPARAM wp, LPARAM lp)
    }
    auto lwp = LOWORD(wp);
    switch (msg) {
+   case WM_CTLCOLORBTN:
+      if (LOWORD(wp) >= myFieldId && lwp < myFieldId + 100) {
+         return SetBtnClr(lwp);
+      }
+      return DefWindowProc(window, msg, wp, lp);
    case WM_DESTROY:
       PostQuitMessage(0);
       return 0;
@@ -355,6 +373,9 @@ int main(int argc, char* argv[])
       BoostClient client(io_service, iterator);
       cl = &client;
       ConsoleGui gui(&client);
+
+      cl->gameState = egs::preparation;
+      cl->state = ClientState::session;
 
       boost::thread t(boost::bind(&boost::asio::io_service::run, &io_service));
 
