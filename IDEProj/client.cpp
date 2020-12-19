@@ -237,10 +237,10 @@ void Client::HandleMessageSession(const std::string& msg)
 			break;
 
 		case 'g':
-			m_en.set_cell(msg[2] - '0', msg[4] - '0', cell::ship | cell::shot);
-			m_en.kill(msg[2] - '0', msg[4] - '0');
-			gameState = egs::end;
-			gui->draw();
+         m_en.set_cell(msg[2] - '0', msg[4] - '0', cell::ship | cell::shot);
+         m_en.kill(msg[2] - '0', msg[4] - '0');
+         gameState = egs::end;
+         gui->draw();
 			cout << "\x1B[92mYou won!\x1B[0m" << endl;
 			receive = false; // продолжаем стрелять
 			break;
@@ -291,8 +291,8 @@ void Client::HandleMessageSession(const std::string& msg)
 			break;
 
 		case 'g':
-			m_my.set_cell(msg[2] - '0', msg[4] - '0', cell::ship | cell::shot);
-			m_my.kill(msg[2] - '0', msg[4] - '0');
+         m_my.set_cell(msg[2] - '0', msg[4] - '0', cell::ship | cell::shot);
+         m_my.kill(msg[2] - '0', msg[4] - '0');
 			gameState = egs::end;
 			gui->draw();
 			cout << "\x1B[91mYou lost!\x1B[0m" << endl;
@@ -305,14 +305,20 @@ void Client::HandleMessageSession(const std::string& msg)
 		break;
 	}
 
-	case egs::end:
+   case egs::end:
 	{
-		cout << "You should proceed to the lobby." << endl;
-		gui->draw();
-		//std::cout << "\x1B[93m";
-		//std::cout.write(m_read_msg.body(), m_read_msg.body_length());
-		//std::cout << "\n";
-		//std::cout << "\x1B[0m";
+      if (msg == "continue") {
+         cout << "Moving to the lobby." << endl;
+         gameState = egs::preparation;
+         state = ClientState::lobby;
+         ready = false;
+         
+         gui->draw();
+         //std::cout << "\x1B[93m";
+         //std::cout.write(m_read_msg.body(), m_read_msg.body_length());
+         //std::cout << "\n";
+         //std::cout << "\x1B[0m";
+      }
 		break;
 	}
 	}

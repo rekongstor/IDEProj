@@ -295,8 +295,6 @@ bool Server::HandleMessageSession(const std::string& msg, participant* sender)
 					int x = msg[0] - '0';
 					int y = msg[2] - '0';
 					int c = my_field->get_cell(x, y);
-					my_field->set_cell(x, y, c | cell::shot);
-
 
 					if (c & cell::shot) {
 						std::cout << "Turn repeat - failed " << msg << endl;
@@ -304,6 +302,8 @@ bool Server::HandleMessageSession(const std::string& msg, participant* sender)
 						WriteMsg(sendMsg, sender);
 						return true;
 					}
+
+               my_field->set_cell(x, y, c | cell::shot);
 
 					if (c & cell::ship) {
 						std::cout << "Hit! " << msg << endl;
@@ -315,21 +315,20 @@ bool Server::HandleMessageSession(const std::string& msg, participant* sender)
 							my_field->kill(x, y);
 							sh[0] = 'k';
 						}
+                                   
+                  if (game_finished(my_field)) {
+                     std::cout << "GG " << msg << endl;
+                     sh[0] = 'g'; // победа
+                     client.lobby->m_game.set_state(Game::egs::end);
+                     enemy.lobby->m_game.set_state(Game::egs::end);
+                     client.isReady = false;
+                     enemy.isReady = false;
+                     client.lobby->m_game.m_p1_ready = false;
+                     client.lobby->m_game.m_p2_ready = false;
+                  }
 
-						set_msg(sh); // попадание
-
-						if (game_finished(my_field)) {
-							std::cout << "GG " << msg << endl;
-							set_msg("g"); // победа
-							WriteLobby(sendMsg, sender);
-							client.isWin = true;
-							enemy.isWin = false;
-							client.lobby->m_game.set_state(Game::egs::end);
-							enemy.lobby->m_game.set_state(Game::egs::end);
-							return true;
-						}
-
-						WriteLobby(sendMsg, sender);
+                  set_msg(sh); // попадание
+                  WriteLobby(sendMsg, sender);
 						return true;
 					} else {
 						std::cout << "Miss " << msg << endl;
@@ -353,6 +352,18 @@ bool Server::HandleMessageSession(const std::string& msg, participant* sender)
 		WriteLobby(sendMsg, sender);
 		return true;
 	}
+   if (client.lobby->m_game.get_state() == Game::egs::end) {
+      if (msg == "continue") {
+         set_msg("continue");
+         WriteMsg(sendMsg, sender);
+         client.state = ClientState::lobby;
+         if (enemy.state == ClientState::lobby) {
+            client.lobby->m_game.set_state(Game::egs::preparation);
+         }
+         client.isReady = false;
+         return true;
+      }
+   }
 	set_msg("f"); // это сообщение об ошибке, да?
 	WriteMsg(sendMsg, sender);
 	std::cout << this << ": " << msg << endl;

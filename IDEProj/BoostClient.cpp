@@ -1,6 +1,7 @@
 ﻿
 #include "BoostClient.h"
 #include <string>
+#include <chrono>
 
 
 BoostClient::BoostClient(boost::asio::io_service& io_service,
@@ -8,9 +9,8 @@ BoostClient::BoostClient(boost::asio::io_service& io_service,
 	: m_io_service_(io_service),
 	m_socket(io_service)
 {
-	time_t t;
-	time(&t);
-	id = t;
+   const auto p1 = std::chrono::system_clock::now();
+	id = std::chrono::duration_cast<std::chrono::seconds>(p1.time_since_epoch()).count();
 	boost::asio::async_connect(m_socket, endpoint_iterator,
 		boost::bind(&BoostClient::handle_connect, this,
 			boost::asio::placeholders::error));
@@ -48,6 +48,9 @@ void BoostClient::handle_read_header(const boost::system::error_code& error)
 {
 	if (!error && m_read_msg.decode_header())
 	{
+      std::cout.write(m_read_msg.data(), m_read_msg.header_length);
+      std::cout << "\n";
+
 		boost::asio::async_read(m_socket,
 			boost::asio::buffer(m_read_msg.body(), m_read_msg.body_length()),
 			boost::bind(&BoostClient::handle_read_body, this,
@@ -79,8 +82,8 @@ void BoostClient::handle_read_body(const boost::system::error_code& error)
 	if (!error)
 	{
 		decode_message();
-		//std::cout.write(m_read_msg.body(), m_read_msg.body_length());
-		//std::cout << "\n";
+      std::cout.write(m_read_msg.body(), m_read_msg.body_length());
+      std::cout << "\n";
 
 
 		boost::asio::async_read(m_socket,

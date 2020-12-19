@@ -9,7 +9,9 @@ extern HWND window;
 
 void ConsoleGui::clear()
 {
-	system("cls");
+   if (!window) {
+	   system("cls");
+   }
 }
 
 ConsoleGui::ConsoleGui(Client* cl) : client(cl)
@@ -20,6 +22,10 @@ ConsoleGui::ConsoleGui(Client* cl) : client(cl)
 void ConsoleGui::draw()
 {
 	clear();
+   if (window) {
+      UpdateWindow();
+      return;
+   }
 	if (client->gameState == egs::preparation)
 	{
 
@@ -47,13 +53,12 @@ void ConsoleGui::draw()
 		//cout << "Enter ship location in the following format:\ns x y w d\nWhere\nx - x coordinate [0-9]\ny - y coordinate [0-9]\nw - width of the ship [1-4]\nd - direction of the ship [v/h]\n";
 	}
    cout << "\x1B[0m";
-   if (window) {
-      UpdateWindow();
-   }
 }
 
 void ConsoleGui::draw_field_cell(int c)
 {
+   if (window)
+      return;
 	if (c == 0)
 		cout << "\x1B[90m°" << ' ';
 	if (c == 1)
@@ -66,7 +71,9 @@ void ConsoleGui::draw_field_cell(int c)
 
 void ConsoleGui::draw_game_grid()
 {
-	cout << "\x1B[95m  x 0 1 2 3 4 5 6 7 8 9			  x 0 1 2 3 4 5 6 7 8 9\x1B[0m\n\x1B[92my   \x1B[95m___________________			\x1B[92my   \x1B[95m___________________\n";
+   if (window)
+      return;
+   cout << "\x1B[95m  x 0 1 2 3 4 5 6 7 8 9			  x 0 1 2 3 4 5 6 7 8 9\x1B[0m\n\x1B[92my   \x1B[95m___________________			\x1B[92my   \x1B[95m___________________\n";
 	for (int y = 0; y < 10; ++y)
 	{
 		cout << "\x1B[92m" << y << "|  \x1B[0m";
@@ -85,6 +92,8 @@ void ConsoleGui::draw_game_grid()
 
 void ConsoleGui::draw_own_grid()
 {
+   if (window)
+      return;
 	cout << "\x1B[95m  x 0 1 2 3 4 5 6 7 8 9\n\x1B[92my   \x1B[95m___________________\n";
 	for (int y = 0; y < 10; ++y)
 	{

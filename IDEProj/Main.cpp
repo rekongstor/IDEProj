@@ -68,7 +68,6 @@ CHAR buff[1024];
 #define buttonsSessionEndgame { "Continue" }
 
 bool isActive = true;
-bool needUpdate = false;
 
 void UpdateList(const char* lList)
 {
@@ -179,9 +178,7 @@ void FuncBtn(int fBtn)
       case egs::end:
          switch (fBtn) {
          case 0:
-            cl->gameState = egs::preparation;
-            cl->state = ClientState::lobby;
-            needUpdate = true;
+            cl->HandleSendMessage("continue");
             break;
          }
          break;
@@ -211,13 +208,9 @@ long long winProc(HWND window, unsigned msg, WPARAM wp, LPARAM lp)
 {
    if (!isActive)
    {
+      //system("kill");
+      throw(0);
       PostQuitMessage(0);
-      return 0;
-   }
-   if (needUpdate)
-   {
-      needUpdate = false;
-      UpdateWindow(window);
       return 0;
    }
    auto lwp = LOWORD(wp);
@@ -345,36 +338,36 @@ void UpdateWindow()
 
 int main(int argc, char* argv[])
 {
-	try
-	{
-		if (argc != 3)
-		{
-			std::cerr << "Usage: chat_client <host> <port>\n";
-			return 1;
-		}
+   try
+   {
+      if (argc < 3)
+      {
+         std::cerr << "Usage: chat_client <host> <port>\n";
+         return 1;
+      }
 
-		boost::asio::io_service io_service;
+      boost::asio::io_service io_service;
 
-		tcp::resolver resolver(io_service);
-		tcp::resolver::query query(argv[1], argv[2]);
-		tcp::resolver::iterator iterator = resolver.resolve(query);
+      tcp::resolver resolver(io_service);
+      tcp::resolver::query query(argv[1], argv[2]);
+      tcp::resolver::iterator iterator = resolver.resolve(query);
 
-		BoostClient client(io_service, iterator);
-		cl = &client;
-		ConsoleGui gui(&client);
-		
-		boost::thread t(boost::bind(&boost::asio::io_service::run, &io_service));
+      BoostClient client(io_service, iterator);
+      cl = &client;
+      ConsoleGui gui(&client);
 
-		char line[message::max_body_length + 1];
-		gui.draw();
+      boost::thread t(boost::bind(&boost::asio::io_service::run, &io_service));
 
-		wndClass = { sizeof(WNDCLASSEX), CS_DBLCLKS, winProc,
-	0, 0, GetModuleHandle(nullptr), LoadIcon(nullptr,IDI_APPLICATION),
-	LoadCursor(nullptr,IDC_ARROW), HBRUSH(COLOR_WINDOW),
-	nullptr, "Seafight",LoadIcon(nullptr,IDI_APPLICATION)
-		};
+      char line[message::max_body_length + 1];
+      gui.draw();
+
+      wndClass = { sizeof(WNDCLASSEX), CS_DBLCLKS, winProc,
+   0, 0, GetModuleHandle(nullptr), LoadIcon(nullptr,IDI_APPLICATION),
+   LoadCursor(nullptr,IDC_ARROW), HBRUSH(COLOR_WINDOW),
+   nullptr, "Seafight",LoadIcon(nullptr,IDI_APPLICATION)
+      };
       if (RegisterClassEx(&wndClass)) {
-         window = CreateWindowEx(0, "Seafight", "Seafight", (WS_OVERLAPPEDWINDOW  ^ WS_THICKFRAME ^ WS_MAXIMIZEBOX), 0, 0,
+         window = CreateWindowEx(0, "Seafight", "Seafight", (WS_OVERLAPPEDWINDOW ^ WS_THICKFRAME ^ WS_MAXIMIZEBOX), 0, 0,
             width, height, nullptr, nullptr, GetModuleHandle(nullptr), nullptr);
          if (window) {
             ShowWindow(window, SW_SHOWDEFAULT);
@@ -382,32 +375,38 @@ int main(int argc, char* argv[])
          }
       }
 
-		if (window) {
-			#ifdef _DEBUG
-         ::ShowWindow(::GetConsoleWindow(), SW_SHOW);
-         #endif // _DEBUG
-			MSG msg;
+      if (window) {
+#ifdef _DEBUG
+         if (argc != 4) {
+            ShowWindow(::GetConsoleWindow(), SW_SHOW);
+         }
+         else {
+            ShowWindow(::GetConsoleWindow(), SW_HIDE);
+         }
+#endif // _DEBUG
+         MSG msg;
          InitWindow();
          gui.draw();
-			while (GetMessage(&msg, NULL, 0, 0)) {
-				TranslateMessage(&msg);
-				DispatchMessage(&msg);
-			}
-		} else
+         while (GetMessage(&msg, NULL, 0, 0)) {
+            TranslateMessage(&msg);
+            DispatchMessage(&msg);
+         }
+      }
+      else
       {
          while (std::cin.getline(line, message::max_body_length + 1) && isActive) {
             // we want to check our input if we are't waiting for server message
             client.HandleSendMessage(line);
          }
-		}
+      }
 
-		client.close();
-		t.join();
-	}
-	catch (std::exception & e)
-	{
-		std::cerr << "Exception: " << e.what() << "\n";
-	}
+      client.close();
+      t.join();
+   }
+   catch (std::exception & e)
+   {
+      std::cerr << "Exception: " << e.what() << "\n";
+   }
 
-	return 0;
+   return 0;
 }
