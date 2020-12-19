@@ -60,7 +60,8 @@ bool Server::HandleMessageConnected(const std::string& msg, participant* sender)
 
 	if (std::string(msg.c_str(), 7) == "connect")
 	{
-		int id = atoi((msg.substr(11, msg.length()).c_str()));
+
+		int id = atoi(msg.c_str() + 8);
 		auto it = lobbies.find(id);
 		if (it != lobbies.end()) 
 		{
@@ -94,7 +95,6 @@ bool Server::HandleMessageConnected(const std::string& msg, participant* sender)
 		{
 			id = id + to_string(i.first) + ' ';
 		}
-		id = id + 'n';
 
 		set_msg(id.c_str());
 		WriteMsg(sendMsg, sender);
@@ -320,10 +320,7 @@ bool Server::HandleMessageSession(const std::string& msg, participant* sender)
 
 						if (game_finished(my_field)) {
 							std::cout << "GG " << msg << endl;
-							char sh[] = "g x y";
-							sh[2] = '0' + x;
-							sh[4] = '0' + y;
-							set_msg(sh); // победа
+							set_msg("g"); // победа
 							WriteLobby(sendMsg, sender);
 							client.isWin = true;
 							enemy.isWin = false;
@@ -354,27 +351,6 @@ bool Server::HandleMessageSession(const std::string& msg, participant* sender)
 
 
 		WriteLobby(sendMsg, sender);
-		return true;
-	}
-	if (client.lobby->m_game.get_state() == Game::egs::end) {
-		client.state = ClientState::lobby;
-		enemy.state = ClientState::lobby;
-		if (client.isWin)
-		{
-			set_msg("w"); // сейчас сообщения о том, кто победитель, никак не обрабатывается
-			WriteMsg(sendMsg, sender);
-
-			set_msg("l");
-			WriteMsg(sendMsg, client.lobby->GetEnemy(sender));
-		}
-		else
-		{
-			set_msg("l"); // сейчас сообщения о том, кто победитель, никак не обрабатывается
-			WriteMsg(sendMsg, sender);
-
-			set_msg("w");
-			WriteMsg(sendMsg, client.lobby->GetEnemy(sender));
-		}
 		return true;
 	}
 	set_msg("f"); // это сообщение об ошибке, да?

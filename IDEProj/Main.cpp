@@ -68,6 +68,25 @@ CHAR buff[1024];
 #define buttonsSessionEndgame { "Continue" }
 
 bool isActive = true;
+bool needUpdate = false;
+
+void UpdateList(const char* lList)
+{
+   SendMessage(listBox, LB_RESETCONTENT, 0, 0);
+   std::string lll(lList);
+   std::stringstream lobbies;
+   lobbies << lList;
+   int l;
+   while (true) {
+      lobbies >> l;
+      if (lobbies.good())
+         SendMessage(listBox, LB_ADDSTRING, 0, (LPARAM)(LPSTR)(std::to_string(l).c_str()));
+      else
+         break;
+   }
+
+   selected_item = "";
+}
 
 void SetFuncBtns(std::initializer_list<LPCSTR> names)
 {
@@ -160,7 +179,9 @@ void FuncBtn(int fBtn)
       case egs::end:
          switch (fBtn) {
          case 0:
-            cl->HandleSendMessage("leave");
+            cl->gameState = egs::preparation;
+            cl->state = ClientState::lobby;
+            needUpdate = true;
             break;
          }
          break;
@@ -191,6 +212,12 @@ long long winProc(HWND window, unsigned msg, WPARAM wp, LPARAM lp)
    if (!isActive)
    {
       PostQuitMessage(0);
+      return 0;
+   }
+   if (needUpdate)
+   {
+      needUpdate = false;
+      UpdateWindow(window);
       return 0;
    }
    auto lwp = LOWORD(wp);

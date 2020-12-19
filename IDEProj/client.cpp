@@ -1,6 +1,8 @@
 #include "Client.h"
 
 #include <iostream>
+#include <vector>
+#include <sstream>
 
 #include "ConsoleGui.h"
 #include "message.hpp"
@@ -81,18 +83,10 @@ void Client::HandleMessageConnected(const std::string& msg)
 		receive = false;
 		break;
 
-	case 'l':
-		while (message[i] != 'n')
-		{
-			cout << message[i] << endl;
-			i = i + 2;
-		}
-		if (i < 3) 
-		{
-			cout << "Oops! No lobbies have been created yet." << endl;
-		}
-		state = ClientState::connected;
-		receive = false;
+   case 'l':
+		extern void UpdateList(const char* lList);
+		UpdateList(message + 2);
+
 		break;
 
 	default:
@@ -313,18 +307,7 @@ void Client::HandleMessageSession(const std::string& msg)
 
 	case egs::end:
 	{
-		switch (msg[0])
-		{
-		case 'w':
-			cout << "Congratulations! You win! " << endl;
-			break;
-
-		case 'l':
-			cout << "Oops! You lose :(" << endl;
-			break;
-		}	
-
-		cout << "You will be returned to the lobby." << endl;
+		cout << "You should proceed to the lobby." << endl;
 		gui->draw();
 		//std::cout << "\x1B[93m";
 		//std::cout.write(m_read_msg.body(), m_read_msg.body_length());
