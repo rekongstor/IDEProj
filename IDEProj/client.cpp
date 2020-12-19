@@ -42,9 +42,7 @@ void Client::HandleSendMessage(const std::string& line)
 			break;
 
       case ClientState::session:
-			if (!receive) {
-				HandleSendMessageSession(line, msg);
-			}
+			HandleSendMessageSession(line, msg);
 			break;
 		}
 }
@@ -102,6 +100,7 @@ void Client::HandleMessageConnected(const std::string& msg)
 		receive = false;
 		break;
 	}
+	gui->draw();
 }
 
 void Client::HandleSendMessageConnected(const std::string& line, message& msg)
@@ -117,7 +116,6 @@ void Client::HandleSendMessageConnected(const std::string& line, message& msg)
 		receive = false;
 		return;
 	}
-
 }
 
 void Client::HandleMessageLobby(const std::string& msg)
@@ -162,6 +160,7 @@ void Client::HandleMessageLobby(const std::string& msg)
 		receive = false;
 		break;
 	}
+	gui->draw();
 }
 
 void Client::HandleSendMessageLobby(const std::string& line, message& msg)
@@ -186,22 +185,22 @@ void Client::HandleMessageSession(const std::string& msg)
 		if (ready == true) {
 			switch (msg[0]) 
 			{
-			case 't':
-				gui->draw();
-				second_turn = true;
+			case 'f':
+				second_turn = false;
 				receive = false;
 				break;
 
-			case 'd':
-				if (second_turn)
-					gameState = egs::enemy_turn;
-				else
-					gameState = egs::my_turn;
+         case 's':
+            second_turn = true;
 
-				gui->draw();
 				receive = false;
 				break;
-			}
+         }
+         if (second_turn)
+            gameState = egs::enemy_turn;
+         else
+            gameState = egs::my_turn;
+         gui->draw();
 		} else {
 			switch (msg[0]) {
 			case 'd':
@@ -353,7 +352,7 @@ void Client::HandleSendMessageSession(const std::string& line, message& msg)
 			return;
 		} // s x y w d command
 
-		if (line.size() == 1 && line[0] == 'r') {
+		if (line == "ready") {
 			if (m_my.ships_ready()) {
 				ready = true;
 				write(msg);

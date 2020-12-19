@@ -102,7 +102,7 @@ bool Server::HandleMessageConnected(const std::string& msg, participant* sender)
 	}
 
 	if (msg == "quit") {
-      cout << "Player leave" << endl;
+      std::cout << "Player leave" << endl;
       set_msg("q");
       WriteMsg(sendMsg, sender);
       return false;
@@ -121,12 +121,14 @@ bool Server::HandleMessageLobby(const std::string& msg, participant* sender)
 
 	if (msg == "ready") {	
 		SharedClient& client = clentData[sender];
-		client.state = ClientState::lobby;
 		clentData[sender].isReady = true;
 
       Lobby* newLobby = client.lobby;
       if (clentData[newLobby->GetEnemy(sender)].isReady)
       {
+         client.state = ClientState::session;
+         clentData[newLobby->GetEnemy(sender)].state = ClientState::session;
+			client.lobby->m_game.m_game_state = Game::egs::preparation;
 			set_msg("s");
 			WriteLobby(sendMsg, sender);
       }
@@ -142,7 +144,7 @@ bool Server::HandleMessageLobby(const std::string& msg, participant* sender)
 	}
 
 	if (msg == "leave") {
-		cout << "Player leave" << endl;
+		std::cout << "Player leave" << endl;
 		SharedClient& client = clentData[sender];
 		client.state = ClientState::connected;
 		client.lobby->RemoveParticipant(sender);
@@ -155,7 +157,7 @@ bool Server::HandleMessageLobby(const std::string& msg, participant* sender)
 	}
 
 	if (msg == "quit") {
-		cout << "Player leave" << endl;
+		std::cout << "Player leave" << endl;
 		SharedClient& client = clentData[sender];
 		client.lobby->RemoveParticipant(sender);
 		if (!client.lobby->RemoveParticipant(sender))
@@ -203,8 +205,8 @@ bool Server::HandleMessageSession(const std::string& msg, participant* sender)
 
 	if (client.lobby->m_game.get_state() == Game::egs::preparation) {
 		std::cout << "Preparation " << msg.size() << endl;
-		if (msg.size() == 9)
-			if (msg[0] == 's' && \
+		if (msg.size() == 9 && 
+			msg[0] == 's' && \
 				msg[1] == ' ' && \
 				msg[2] >= '0' && msg[2] <= '9' && \
 				msg[3] == ' ' && \
@@ -221,7 +223,7 @@ bool Server::HandleMessageSession(const std::string& msg, participant* sender)
 
 				if (!my_field->set_ship(msg[2] - '0', msg[4] - '0', msg[6] - '0', msg[8])) {
 					set_msg("f");
-					cout << "Placement error" << endl;
+					std::cout << "Placement error" << endl;
 					WriteMsg(sendMsg, sender);
 					return true;
 				}
@@ -230,46 +232,54 @@ bool Server::HandleMessageSession(const std::string& msg, participant* sender)
 				WriteMsg(sendMsg, sender);
 				return true;
 			}
-		if (msg.size() == 1)
-			if (msg[0] == 'r') {
-				if (client.lobby->IsParticipant1(sender))
-					client.lobby->m_game.m_p1_ready = true;
+		if (msg == "ready") {
+			if (client.lobby->IsParticipant1(sender))
+				client.lobby->m_game.m_p1_ready = true;
 
-				if (client.lobby->IsParticipant2(sender))
-					client.lobby->m_game.m_p2_ready = true;
+			if (client.lobby->IsParticipant2(sender))
+				client.lobby->m_game.m_p2_ready = true;
 
-				if (client.lobby->m_game.m_p1_ready && client.lobby->m_game.m_p2_ready) {
-					set_msg("t");
-					WriteMsg(sendMsg, sender);
-					set_msg("d");
-
-					if (client.lobby->IsParticipant1(sender))
-						client.lobby->m_game.set_state(Game::egs::turn_2);
-					else
-						client.lobby->m_game.set_state(Game::egs::turn_1);
-					WriteLobby(sendMsg, sender);
-
-					for (int y = 0; y < 10; ++y) {
-						for (int x = 0; x < 10; ++x)
-							cout << client.lobby->m_game.m_field_1.get_cell(x, y) << ' ';
-						cout << endl;
-					}
-					cout << endl;
-
-					for (int y = 0; y < 10; ++y) {
-						for (int x = 0; x < 10; ++x)
-							cout << client.lobby->m_game.m_field_2.get_cell(x, y) << ' ';
-						cout << endl;
-					}
-					cout << endl;
-
-					return true;
+			if (client.lobby->m_game.m_p1_ready && client.lobby->m_game.m_p2_ready) {
+				bool turn1 = rand() > 0;
+				participant *first, *second;
+				if (turn1)
+				{
+					first = client.lobby->m_participant_1;
+               second = client.lobby->m_participant_2;
+               client.lobby->m_game.set_state(Game::egs::turn_1);
+				} else
+				{
+               first = client.lobby->m_participant_2;
+               second = client.lobby->m_participant_1;
+               client.lobby->m_game.set_state(Game::egs::turn_2);
 				}
+
+				set_msg("f");
+				WriteMsg(sendMsg, first);
+            set_msg("s");
+            WriteMsg(sendMsg, second);
+
+				for (int y = 0; y < 10; ++y) {
+					for (int x = 0; x < 10; ++x)
+						std::cout << client.lobby->m_game.m_field_1.get_cell(x, y) << ' ';
+					std::cout << endl;
+				}
+				std::cout << endl;
+
+				for (int y = 0; y < 10; ++y) {
+					for (int x = 0; x < 10; ++x)
+						std::cout << client.lobby->m_game.m_field_2.get_cell(x, y) << ' ';
+					std::cout << endl;
+				}
+				std::cout << endl;
+
 				return true;
 			}
+			return true;
+		}
 	}
 	if (client.lobby->m_game.get_state() == Game::egs::turn_1 || client.lobby->m_game.get_state() == Game::egs::turn_2) {
-		cout << "Turns " << msg.size() << endl;
+		std::cout << "Turns " << msg.size() << endl;
 		if ((client.lobby->m_game.get_state() == Game::egs::turn_1 && client.lobby->IsParticipant1(sender)) || \
 			(client.lobby->m_game.get_state() == Game::egs::turn_2 && client.lobby->IsParticipant2(sender))) {
 			if (msg.size() == 3)
@@ -289,14 +299,14 @@ bool Server::HandleMessageSession(const std::string& msg, participant* sender)
 
 
 					if (c & cell::shot) {
-						cout << "Turn repeat - failed " << msg << endl;
+						std::cout << "Turn repeat - failed " << msg << endl;
 						set_msg("f"); // выстрел туда же?
 						WriteMsg(sendMsg, sender);
 						return true;
 					}
 
 					if (c & cell::ship) {
-						cout << "Hit! " << msg << endl;
+						std::cout << "Hit! " << msg << endl;
 						char sh[] = "h x y";
 						sh[2] = '0' + x;
 						sh[4] = '0' + y;
@@ -309,7 +319,7 @@ bool Server::HandleMessageSession(const std::string& msg, participant* sender)
 						set_msg(sh); // попадание
 
 						if (game_finished(my_field)) {
-							cout << "GG " << msg << endl;
+							std::cout << "GG " << msg << endl;
 							char sh[] = "g x y";
 							sh[2] = '0' + x;
 							sh[4] = '0' + y;
@@ -325,7 +335,7 @@ bool Server::HandleMessageSession(const std::string& msg, participant* sender)
 						WriteLobby(sendMsg, sender);
 						return true;
 					} else {
-						cout << "Miss " << msg << endl;
+						std::cout << "Miss " << msg << endl;
 						char sh[] = "m x y";
 						sh[2] = '0' + x;
 						sh[4] = '0' + y;
@@ -336,7 +346,7 @@ bool Server::HandleMessageSession(const std::string& msg, participant* sender)
 					}
 				}
 		} else {
-			cout << "Turn order - failed " << msg << endl;
+			std::cout << "Turn order - failed " << msg << endl;
 			set_msg("f"); // ход не в своё время
 			WriteMsg(sendMsg, sender);
 			return true;
@@ -369,5 +379,5 @@ bool Server::HandleMessageSession(const std::string& msg, participant* sender)
 	}
 	set_msg("f"); // это сообщение об ошибке, да?
 	WriteMsg(sendMsg, sender);
-	cout << this << ": " << msg << endl;
+	std::cout << this << ": " << msg << endl;
 }

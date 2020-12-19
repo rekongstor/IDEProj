@@ -1,8 +1,11 @@
 ﻿#include "ConsoleGui.h"
+#include <Windows.h>
 #include <iostream>
 #include "Client.h"
 
 using namespace std;
+void UpdateWindow();
+extern HWND window;
 
 void ConsoleGui::clear()
 {
@@ -43,7 +46,10 @@ void ConsoleGui::draw()
 		draw_game_grid();
 		//cout << "Enter ship location in the following format:\ns x y w d\nWhere\nx - x coordinate [0-9]\ny - y coordinate [0-9]\nw - width of the ship [1-4]\nd - direction of the ship [v/h]\n";
 	}
-	cout << "\x1B[0m";
+   cout << "\x1B[0m";
+   if (window) {
+      UpdateWindow();
+   }
 }
 
 void ConsoleGui::draw_field_cell(int c)
