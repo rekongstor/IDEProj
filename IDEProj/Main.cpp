@@ -103,7 +103,7 @@ std::string SetShip()
 
 void FuncBtn(int fBtn)
 {
-   std::string setShip;
+   std::string msg;
 	switch (cl->state)
 	{
 	case ClientState::connected:
@@ -148,9 +148,9 @@ void FuncBtn(int fBtn)
       case egs::preparation:
          switch (fBtn) {
          case 0:
-            setShip = SetShip();
-            if (!setShip.empty())
-               cl->HandleSendMessage(setShip);
+            msg = SetShip();
+            if (!msg.empty())
+               cl->HandleSendMessage(msg);
             break;
          case 1:
             cl->HandleSendMessage("ready");
@@ -167,6 +167,23 @@ void FuncBtn(int fBtn)
       }
 		break;
 	}
+}
+
+void PrepShip(int fBtn)
+{
+   if (cl->state != ClientState::session && cl->gameState != egs::preparation)
+      return;
+
+}
+
+void Shoot(int fBtn)
+{
+   if (cl->state != ClientState::session && cl->gameState != egs::my_turn)
+      return;
+
+   std::string shot = std::to_string(fBtn / 10) + " " + std::to_string(fBtn % 10);
+   cl->HandleSendMessage(shot);
+
 }
 
 long long winProc(HWND window, unsigned msg, WPARAM wp, LPARAM lp)
@@ -192,7 +209,15 @@ long long winProc(HWND window, unsigned msg, WPARAM wp, LPARAM lp)
 		{
 			FuncBtn(lwp - fncBtn);
          return 0;
-		}
+      }
+      if (LOWORD(wp) >= myFieldId && lwp < myFieldId + 100) {
+         PrepShip(lwp - myFieldId);
+         return 0;
+      }
+      if (LOWORD(wp) >= enFieldId && lwp < enFieldId + 100) {
+         Shoot(lwp - enFieldId);
+         return 0;
+      }
    default:
       return DefWindowProc(window, msg, wp, lp);
    }
