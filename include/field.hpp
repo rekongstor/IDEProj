@@ -66,9 +66,9 @@ public:
 		// find ship start
 		for (int i = 1; i <= 4; ++i)
 		{
-			if (m_field[x - 1][y] & cell::ship)
+			if (check_bound(x - 1, y) &&  m_field[x - 1][y] & cell::ship)
 				--x;
-			if (m_field[x][y - 1] & cell::ship)
+			if (check_bound(x, y - 1) && m_field[x][y - 1] & cell::ship)
 				--y;
 		}
 
@@ -80,14 +80,15 @@ public:
 				if (!(m_field[x][y] & cell::shot))
 					return false;
 
-				if (m_field[x + 1][y] & cell::ship)
+				if (check_bound(x + 1, y) && m_field[x + 1][y] & cell::ship)
 					++x;
-				if (m_field[x][y + 1] & cell::ship)
+				if (check_bound(x, y + 1) && m_field[x][y + 1] & cell::ship)
 					++y;
 			}
 			else
 				return true;
 		}
+		return true;
 	}
 	/// <summary>
 	/// Метод, устанавливающий вокруг убитого корабля промахи
@@ -95,13 +96,12 @@ public:
 	void kill(int x, int y)
 	{
 		// find ship start
-		for (int i = 1; i <= 4; ++i)
-		{
-			if (m_field[x - 1][y] & cell::ship)
-				--x;
-			if (m_field[x][y - 1] & cell::ship)
-				--y;
-		}
+      for (int i = 1; i <= 4; ++i) {
+         if (check_bound(x - 1, y) && m_field[x - 1][y] & cell::ship)
+            --x;
+         if (check_bound(x, y - 1) && m_field[x][y - 1] & cell::ship)
+            --y;
+      }
 
 		for (int i = 1; i <= 4; ++i)
 		{
@@ -126,9 +126,9 @@ public:
 				if (check_bound(x + 1, y + 1))
 					m_field[x + 1][y + 1] |= cell::shot;
 
-				if (m_field[x + 1][y] & cell::ship)
+				if (check_bound(x + 1, y) && m_field[x + 1][y] & cell::ship)
 					++x;
-				if (m_field[x][y + 1] & cell::ship)
+				if (check_bound(x, y + 1) && m_field[x][y + 1] & cell::ship)
 					++y;
 			}
 			else

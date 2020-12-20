@@ -54,4 +54,21 @@
       <Filter>Файлы заголовков\Gui</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="empty.bmp">
+      <Filter>Файлы ресурсов</Filter>
+    </Image>
+    <Image Include="ship.bmp">
+      <Filter>Файлы ресурсов</Filter>
+    </Image>
+    <Image Include="ship-prep.bmp">
+      <Filter>Файлы ресурсов</Filter>
+    </Image>
+    <Image Include="ship-shot.bmp">
+      <Filter>Файлы ресурсов</Filter>
+    </Image>
+    <Image Include="shot.bmp">
+      <Filter>Файлы ресурсов</Filter>
+    </Image>
+  </ItemGroup>
 </Project>

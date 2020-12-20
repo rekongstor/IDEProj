@@ -95,7 +95,7 @@ bool Server::HandleMessageConnected(const std::string& msg, participant* sender)
 		{
 			id = id + to_string(i.first) + ' ';
 		}
-
+		id += " n";
 		set_msg(id.c_str());
 		WriteMsg(sendMsg, sender);
 		return true;
@@ -121,11 +121,15 @@ bool Server::HandleMessageLobby(const std::string& msg, participant* sender)
 
 	if (msg == "ready") {	
 		SharedClient& client = clentData[sender];
-		clentData[sender].isReady = true;
+      clentData[sender].isReady = true;
+      set_msg("r");
+      WriteMsg(sendMsg, sender);
 
       Lobby* newLobby = client.lobby;
       if (clentData[newLobby->GetEnemy(sender)].isReady)
       {
+			client.lobby->m_game.m_field_1.clear();
+			client.lobby->m_game.m_field_2.clear();
          client.state = ClientState::session;
          clentData[newLobby->GetEnemy(sender)].state = ClientState::session;
 			client.lobby->m_game.m_game_state = Game::egs::preparation;

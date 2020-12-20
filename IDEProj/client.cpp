@@ -127,20 +127,27 @@ void Client::HandleMessageLobby(const std::string& msg)
 		break;
 
 	case 'u':
-		cout << "Now you are unready." << endl;
-		state = ClientState::lobby;
+      state = ClientState::lobby;
+      gui->lobbyReady = false;
 		receive = false;
+      gui->draw();
+      cout << "Now you are unready." << endl;
 		break;
 
-	case 'r':
-		cout << "You are ready to start the game. The game is starting soon!" << endl;
-		state = ClientState::lobby;
-		receive = true;
+   case 'r':
+      state = ClientState::lobby;
+      gui->lobbyReady = true;
+      receive = true;
+      gui->draw();
+      cout << "You are ready to start the game. The game is starting soon!" << endl;
 		break;
 
 	case 's':
-		cout << "Let's start the game. Good luck!" << endl;
-		state = ClientState::session;
+      cout << "Let's start the game. Good luck!" << endl;
+      gui->lobbyReady = false;
+      state = ClientState::session;
+      m_my.clear();
+      m_en.clear();
 		receive = false;
 		break;
 
@@ -347,8 +354,7 @@ void Client::HandleSendMessageSession(const std::string& line, message& msg)
 				write(msg);
 				receive = true;
 				return;
-			}
-			else {
+			} else {
 				gui->draw();
 				cout << "\x1B[31mShips not ready!\x1B[0m" << endl;
 				return;

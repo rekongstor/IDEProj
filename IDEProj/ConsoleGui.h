@@ -20,6 +20,8 @@ public:
 	/// </summary>
 	void draw();
 
+	bool lobbyReady = false;
+
 private:
 	Client* client;
 	void draw_own_grid();

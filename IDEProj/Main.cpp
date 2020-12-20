@@ -27,14 +27,17 @@ typedef std::deque<message> message_queue;
 
 
 int width = 520;
-int height = 480;
+int height = 380;
 WNDCLASSEX wndClass;
 HWND window;
 Client* cl;
+ConsoleGui* pGui;
 
 HWND myFieldBtns[10][10];
 HWND enFieldBtns[10][10];
+
 bool selectedMy[10][10];
+int shipLength = 0;
 
 HWND btnFunctional[6];
 HWND listBox;
@@ -58,18 +61,37 @@ const int enFieldId = 5000;
 const int fncBtn = 6000;
 const int lBox = 7000;
 
+
 std::string selected_item = "";
 CHAR buff[1024];
 
 #define buttonsConnected { "Create", "Update", "Join", "Join any", "Quit" }
 #define buttonsLobby { "Ready", "Leave", "Quit" }
+#define buttonsLobbyUnready { "Uneady", "Leave", "Quit" }
 #define buttonsSessionPrep { "Set", "Ready" }
 #define buttonsSessionPrepReady { }
-#define buttonsSessionMyTurn { "OK" }
-#define buttonsSessionEnTurn { }
+#define buttonsSessionMyTurn { "Your turn" }
+#define buttonsSessionEnTurn { "Enemy turn" }
 #define buttonsSessionEndgame { "Continue" }
 
 bool isActive = true;
+bool* lastPressed = nullptr;
+char orientation = 'h';
+
+std::string SetShip()
+{
+   for (int i = 0; i < 10; ++i) {
+      for (int j = 0; j < 10; ++j) {
+         if (selectedMy[i][j]) {
+            std::string ship = "s " + std::to_string(i) + " " + std::to_string(j) + " " + std::to_string(shipLength) + " " + orientation;
+            shipLength = 0;
+            memset(selectedMy, 0, sizeof(bool) * 100);
+            return ship;
+         }
+      }
+   }
+   return "";
+}
 
 void UpdateList(const char* lList)
 {
@@ -116,11 +138,6 @@ void SetListVisibility(bool vis)
    ShowWindow(listBox, vis ? SW_SHOW : SW_HIDE);
 }
 
-std::string SetShip()
-{
-   return "s 0 0 1 h";
-}
-
 void FuncBtn(int fBtn)
 {
    std::string msg;
@@ -151,7 +168,10 @@ void FuncBtn(int fBtn)
 	case ClientState::lobby:
       switch (fBtn) {
       case 0:
-         cl->HandleSendMessage("ready");
+         if (pGui->lobbyReady)
+            cl->HandleSendMessage("unready");
+         else
+            cl->HandleSendMessage("ready");
          break;
       case 1:
          cl->HandleSendMessage("leave");
@@ -173,7 +193,10 @@ void FuncBtn(int fBtn)
                cl->HandleSendMessage(msg);
             break;
          case 1:
-            cl->HandleSendMessage("ready");
+            if (shipLength == 0)
+            {
+               cl->HandleSendMessage("ready");
+            }
             break;
          }
          break;
@@ -189,6 +212,57 @@ void FuncBtn(int fBtn)
 	}
 }
 
+void SetCell(HWND btn, int state)
+{
+   LPCSTR imgName = "empty.bmp";
+   switch (state)
+   {
+   case (cell::ship | cell::shot):
+      imgName = "ship-shot.bmp";
+      break;
+   case (cell::ship):
+      imgName = "ship.bmp";
+      break;
+   case (cell::shot):
+      imgName = "shot.bmp";
+      break;
+   case 65536:
+      imgName = "ship-prep.bmp";
+      break;
+   }
+   auto img = LoadImage(NULL, imgName, IMAGE_BITMAP, 0, 0, LR_DEFAULTCOLOR | LR_DEFAULTSIZE | LR_LOADFROMFILE);
+   SendMessage(btn, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)img);
+}
+
+bool IsNearLast(int x, int y)
+{
+   if (orientation == 'h') 
+      return &selectedMy[x - 1][y] == lastPressed;
+
+   if (orientation == 'v')
+      return &selectedMy[x][y - 1] == lastPressed;
+
+   return false;
+}
+
+bool CanSetShip(int x, int y)
+{
+   if (shipLength <= 1 || (shipLength < 4 && IsNearLast(x, y))) {
+      bool noShipsYet = true;
+      for (int i = -1; i <= 1; ++i) {
+         for (int j = -1; j <= 1; ++j) {
+            if (cl->m_my.check_bound(x + i, y + j) && cl->m_my.get_cell(x + i, y + j)) {
+               noShipsYet = false;
+               i = 2;
+               break;
+            }
+         }
+      }
+      return noShipsYet;
+   }
+   return false;
+}
+
 void PrepShip(int fBtn)
 {
    if (cl->state != ClientState::session && cl->gameState != egs::preparation)
@@ -196,14 +270,17 @@ void PrepShip(int fBtn)
    int i = fBtn / 10;
    int j = fBtn % 10;
 
-   ////HBRUSH brush = CreateSolidBrush(RGB(0, 0, 255));
-   //SetClassLongPtr(myFieldBtns[i][j], GCLP_HBRBACKGROUND, (LONG_PTR)brush);
-   //SendMessage(window, WM_CTLCOLORBTN, RGB(0, 0, 255), myFieldId + fBtn);
-}
-
-LRESULT SetBtnClr(int fBtn)
-{
-   return RGB(0, 0, 255);
+   if (CanSetShip(i, j)) {
+      bool& selected = selectedMy[i][j];
+      selected = !selected;
+      SetCell(myFieldBtns[i][j], selected ? 65536 : 0);
+      shipLength++;
+      if (i > 0 && &selectedMy[i - 1][j] == lastPressed)
+         orientation = 'h';
+      else
+         orientation = 'v';
+      lastPressed = &selected;
+   }
 }
 
 void Shoot(int fBtn)
@@ -216,7 +293,6 @@ void Shoot(int fBtn)
 
 }
 
-
 long long winProc(HWND window, unsigned msg, WPARAM wp, LPARAM lp)
 {
    if (!isActive)
@@ -228,11 +304,6 @@ long long winProc(HWND window, unsigned msg, WPARAM wp, LPARAM lp)
    }
    auto lwp = LOWORD(wp);
    switch (msg) {
-   case WM_CTLCOLORBTN:
-      if (LOWORD(wp) >= myFieldId && lwp < myFieldId + 100) {
-         return SetBtnClr(lwp);
-      }
-      return DefWindowProc(window, msg, wp, lp);
    case WM_DESTROY:
       PostQuitMessage(0);
       return 0;
@@ -267,13 +338,15 @@ void InitWindow()
 	{
 	   for (int j = 0; j < 10; ++j)
 	   {
-			myFieldBtns[i][j] = CreateWindowEx(WS_EX_CLIENTEDGE, TEXT("button"), TEXT(""), WS_CHILD | WS_VISIBLE,
+			myFieldBtns[i][j] = CreateWindowA(TEXT("button"), TEXT(""), WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_BITMAP,
 				myFieldPadLeft + i * (cellSize + cellPad), fieldPadTop + j * (cellSize + cellPad), cellSize, cellSize,
-				window, (HMENU)(myFieldId + i * 10 + j), NULL, NULL);
+            window, (HMENU)(myFieldId + i * 10 + j), NULL, NULL);
+         SetCell(myFieldBtns[i][j] , 0);
 
-         enFieldBtns[i][j] = CreateWindowEx(WS_EX_CLIENTEDGE, TEXT("button"), TEXT(""), WS_CHILD | WS_VISIBLE,
+         enFieldBtns[i][j] = CreateWindowA(TEXT("button"), TEXT(""), WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_BITMAP,
             myFieldPadLeft + 10 * (cellSize + cellPad) + enFieldPadLeft + i * (cellSize + cellPad), fieldPadTop + j * (cellSize + cellPad), cellSize, cellSize,
             window, (HMENU)(enFieldId + i * 10 + j), NULL, NULL);
+         SetCell(enFieldBtns[i][j], 0);
 	   }
 	}
 	
@@ -289,22 +362,30 @@ void InitWindow()
       window, (HMENU)lBox, GetModuleHandle(nullptr), NULL);
 }
 
-void SetEnFieldCells(bool visible)
+void SetEnFieldCells(bool visible, bool enabled = false)
 {
    for (int i = 0; i < 10; ++i)
    {
       for (int j = 0; j < 10; ++j)
       {
          ShowWindow(enFieldBtns[i][j], visible ? SW_SHOW : SW_HIDE);
+         if (visible) {
+            SetCell(enFieldBtns[i][j], cl->m_en.get_cell(i, j));
+         //EnableWindow(enFieldBtns[i][j], enabled);
+         }
       }
    }
 }
 
-void SetMyFieldCells(bool visible)
+void SetMyFieldCells(bool visible, bool enabled = false)
 {
    for (int i = 0; i < 10; ++i) {
       for (int j = 0; j < 10; ++j) {
          ShowWindow(myFieldBtns[i][j], visible ? SW_SHOW : SW_HIDE);
+         if (visible) {
+            SetCell(myFieldBtns[i][j], cl->m_my.get_cell(i, j));
+         }
+         //EnableWindow(myFieldBtns[i][j], enabled);
       }
    }
 }
@@ -320,7 +401,10 @@ void UpdateWindow()
       SetEnFieldCells(false);
       break;
    case ClientState::lobby:
-      SetFuncBtns(buttonsLobby);
+      if (pGui->lobbyReady)
+         SetFuncBtns(buttonsLobbyUnready);
+      else
+         SetFuncBtns(buttonsLobby);
       SetListVisibility(false);
       SetMyFieldCells(false);
       SetEnFieldCells(false);
@@ -331,18 +415,18 @@ void UpdateWindow()
       {
       case egs::preparation:
          SetFuncBtns(buttonsSessionPrep);
-         SetMyFieldCells(true);
+         SetMyFieldCells(true, true);
          SetEnFieldCells(false);
          break;
       case egs::my_turn:
          SetFuncBtns(buttonsSessionMyTurn);
-         SetMyFieldCells(true);
-         SetEnFieldCells(true);
+         SetMyFieldCells(true, false);
+         SetEnFieldCells(true, true);
          break;
       case egs::enemy_turn:
          SetFuncBtns(buttonsSessionEnTurn);
-         SetMyFieldCells(true);
-         SetEnFieldCells(true);
+         SetMyFieldCells(true, false);
+         SetEnFieldCells(true, false);
          break;
       case egs::end:
          SetFuncBtns(buttonsSessionEndgame);
@@ -373,9 +457,7 @@ int main(int argc, char* argv[])
       BoostClient client(io_service, iterator);
       cl = &client;
       ConsoleGui gui(&client);
-
-      cl->gameState = egs::preparation;
-      cl->state = ClientState::session;
+      pGui = &gui;
 
       boost::thread t(boost::bind(&boost::asio::io_service::run, &io_service));
 
@@ -397,14 +479,12 @@ int main(int argc, char* argv[])
       }
 
       if (window) {
-#ifdef _DEBUG
          if (argc != 4) {
-            ShowWindow(::GetConsoleWindow(), SW_SHOW);
-         }
-         else {
             ShowWindow(::GetConsoleWindow(), SW_HIDE);
          }
-#endif // _DEBUG
+         else {
+            ShowWindow(::GetConsoleWindow(), SW_SHOW);
+         }
          MSG msg;
          InitWindow();
          gui.draw();

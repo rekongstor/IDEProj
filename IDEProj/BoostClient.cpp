@@ -66,7 +66,7 @@ void BoostClient::decode_message()
 {
 	using namespace std;
 	
-	string msg = m_read_msg.body();
+	string msg(m_read_msg.body(), m_read_msg.body_length());
 
    OutputDebugString("Client ");
    OutputDebugString(std::to_string(id).c_str());
