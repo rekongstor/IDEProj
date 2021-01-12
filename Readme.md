@@ -29,4 +29,6 @@
 5) [для генерации документации] Назначить пути до Doxygen в Параметрах (предварительно установить Doxygen с официального сайта http://www.doxygen.nl/download.html)
 
 ## Preview
+![Seafight New](https://github.com/rekongstor/IDEProj/blob/master/previewnew.png)
+Console clinet interface
 ![Seafight](https://github.com/rekongstor/IDEProj/blob/master/preview.png)
